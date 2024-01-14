@@ -45,7 +45,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       body: Padding(
         padding: const EdgeInsets.all(40.0),
         child: Column(
@@ -188,10 +188,9 @@ class _SignUpState extends State<SignUp> {
                           MaterialPageRoute(builder: (context) => LogIn()));
                     },
                     style: ButtonStyle(
-                      //remove the padding of sign in link
                       //this padding is the distance between ...account? and Sign in text
                       padding: MaterialStateProperty.all<EdgeInsets>(
-                          EdgeInsets.zero),
+                          const EdgeInsets.all(5.0)),
                     ),
                     child: const Text('Sign in',
                         style: TextStyle(
