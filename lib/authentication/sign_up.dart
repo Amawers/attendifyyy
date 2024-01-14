@@ -46,16 +46,23 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
+        title: Text('Sign Ups'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: firstNameController,
-              decoration: InputDecoration(labelText: 'First Name'),
+              decoration: InputDecoration(
+                labelText: 'First Name',
+                filled: true,
+                fillColor: Colors.transparent ,
+                border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(10)),
+              ),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -90,10 +97,8 @@ class _SignUpState extends State<SignUp> {
             const SizedBox(height: 20),
             TextButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => LogIn()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LogIn()));
                 },
                 child: const Text('Already have an account? Sign in'))
           ],
