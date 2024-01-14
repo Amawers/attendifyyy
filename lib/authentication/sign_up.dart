@@ -54,8 +54,8 @@ class _SignUpState extends State<SignUp> {
           children: [
             Image.asset(
               'assets/images/logo.png',
-              height: 150,
-              width: 200,
+              height: 120,
+              width: 170,
               fit: BoxFit.contain,
             ),
             TextField(
