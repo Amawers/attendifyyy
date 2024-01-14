@@ -54,29 +54,93 @@ class _LogInState extends State<LogIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Log In'),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(40.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 150,
+              width: 200,
+              fit: BoxFit.contain,
+            ),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide:
+                    BorderSide(color: Color(0xFFABABAB))), // your color
+              ),
             ),
             const SizedBox(height: 20),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide:
+                    BorderSide(color: Color(0xFFABABAB))), // your color
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: postSignUp,
-              child: Text('Log In'),
+              style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      const Size.fromHeight(60)),
+                  backgroundColor:
+                  MaterialStateProperty.all<Color>(const Color(0xFF081631)),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ))),
+              child: const Text('LOG IN',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  )),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Don't have an account?",
+                  style: TextStyle(fontSize: 16.0, color: Color(0xFF777777)),
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ButtonStyle(
+                      //this padding is the distance between ...account? and Sign up text
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.all(5.0)),
+                    ),
+                    child: const Text('Sign up',
+                        style: TextStyle(
+                            fontSize: 16.0, color: Color(0xFF081631))))
+              ],
+            )
           ],
         ),
       ),
