@@ -54,9 +54,9 @@ class _SignUpState extends State<SignUp> {
           children: [
             Image.asset(
               'assets/images/logo.png',
-              height: 200,
-              width: 300,
-              fit: BoxFit.fitWidth,
+              height: 150,
+              width: 200,
+              fit: BoxFit.contain,
             ),
             TextField(
               controller: firstNameController,
