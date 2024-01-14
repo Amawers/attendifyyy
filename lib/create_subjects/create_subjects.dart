@@ -16,7 +16,36 @@ class ListOfSubjects extends StatefulWidget {
 class _ListOfSubjectsState extends State<ListOfSubjects> {
   List<dynamic> converted = [];
 
-  Future<void> getListOfSubjects() async {}
+  @override
+  void initState() {
+    super.initState();
+    getListOfSubjects();
+  }
+
+  Future<void> getListOfSubjects() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String? teacherId = teacherInfo?['teacher_id'];
+    if (teacherId != null && teacherId.isNotEmpty) {
+      final response = await http
+          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          converted = jsonDecode(response.body);
+          print("Already converted from Json: ${converted}");
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("No subjects")));
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
+      }
+    } else {
+      print("Error: Teacher ID is null or empty");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +61,9 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
           itemCount: converted.length,
           itemBuilder: (context, index) {
             return ListOfSubjectsWidget(
-                subject_name: converted[index]['subject_name'],
-                subject_code: converted[index]['subject_code'],
-                section_id: converted[index]['section_id'] ??
-                    'b5322bf4-7e02-4016-8dab-27bfd48e4f50',
+                subject_name: converted[index]['subject_name'] ?? '',
+                subject_code: converted[index]['subject_code'] ?? '',
+                section_name: converted[index]['section_name'] ?? '',
                 subject_id: converted[index]['subject_id']);
           }),
       floatingActionButton: FloatingActionButton(
@@ -55,27 +83,22 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
 class ListOfSubjectsWidget extends StatelessWidget {
   String subject_name;
   String subject_code;
-  String section_id;
+  String section_name;
   String subject_id;
 
   ListOfSubjectsWidget(
       {required this.subject_name,
       required this.subject_code,
-      required this.section_id,
+      required this.section_name,
       required this.subject_id});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) => Dialog(
-                  child: ListOfStudentsScreen(
-                      subject_name: subject_name,
-                      subject_code: subject_code,
-                      section_id: section_id,
-                      subject_id: subject_id)));
+          // showDialog(
+          //     context: context,
+          //     builder: (BuildContext context) => Dialog(child: StudentsList(subject_name: subject_name, subject_code: subject_code, section_id: section_id, subject_id: subject_id)));
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,25 +109,26 @@ class ListOfSubjectsWidget extends StatelessWidget {
               Text(subject_code)
             ]),
             const SizedBox(height: 15),
-            Text(section_id)
+            Text(section_name)
           ],
         ));
   }
 }
+
 class CreateSubject extends StatefulWidget {
   @override
   _CreateSubject createState() => _CreateSubject();
 }
 
 class _CreateSubject extends State<CreateSubject> {
-
   TextEditingController subjectNameController = TextEditingController();
   TextEditingController subjectCodeController = TextEditingController();
   TextEditingController sectionNameController = TextEditingController();
   TextEditingController semesterController = TextEditingController();
 
   Future<void> createSubject() async {
-    Map<String, dynamic>? teacherInfo = await RememberUserPreferences.readUserInfo();
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
 
     String teacherId = teacherInfo?['teacher_id'];
 
@@ -115,8 +139,8 @@ class _CreateSubject extends State<CreateSubject> {
       'section_name': sectionNameController.text,
       'semester': semesterController.text
     });
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('${response.body}')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('${response.body}')));
   }
 
   @override
