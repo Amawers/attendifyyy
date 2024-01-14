@@ -84,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => ListOfSubjects()),
+                    MaterialPageRoute(builder: (context) => const ListOfSubjects()),
                   );
                 },
                 child: const Text('Subjects \n List')),
