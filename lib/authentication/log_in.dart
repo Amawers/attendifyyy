@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
+
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -24,17 +29,20 @@ class _LogInState extends State<LogIn> {
     );
 
     if (response.statusCode == 200) {
-      _response = response.body;
-      if (_response.contains("Login successful")) {
+      var resBodyOfLogin = jsonDecode(response.body);
+      if (resBodyOfLogin['success'] == true) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const BottomNavBar()),
         );
-              ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(_response)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Log in successfully")));
+
+        await RememberUserPreferences.storeUserInfo(
+            resBodyOfLogin["teacherData"]);
       } else {
-              ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Invalid Credentials")));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Invalid Credentials")));
       }
     } else {
       setState(() {
@@ -68,6 +76,7 @@ class _LogInState extends State<LogIn> {
               onPressed: postSignUp,
               child: Text('Log In'),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -1,5 +1,8 @@
 import 'dart:convert';
-import 'package:attendifyyy/student_creation/list_of_students.dart';
+import 'package:attendifyyy/attendance/attendance_list.dart';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/create_students/create_students.dart';
+import 'package:attendifyyy/create_subjects/create_subjects.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -11,11 +14,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
   TextEditingController subjectNameController = TextEditingController();
 
   Map<String, dynamic> converted = {};
+  String teacherName = '';
+  String teacherId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    getTeacherName();
+  }
+
+  Future<void> getTeacherName() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+    setState(() {
+      teacherName = teacherInfo?['first_name'];
+      teacherId = teacherInfo?['teacher_id'];
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
       body: ListView(
         children: [
           Container(
@@ -40,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'Morning, ${converted['first_name']}',
+                        'Morning, ${teacherName}, teacher_id: ${teacherId}',
                         style: const TextStyle(
                           color: Color(0xff081631),
                           fontWeight: FontWeight.bold,
@@ -59,12 +79,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             ElevatedButton(
                 onPressed: () {
-                  // Navigator.pushReplacementNamed(context, '/class_list');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => ListOfSubjects()),
+                  );
                 },
                 child: const Text('Subjects \n List')),
             const SizedBox(height: 30),
@@ -73,13 +94,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Navigator.pushReplacementNamed(context, '/schedule_list');
                 },
                 child: const Text('Schedules \n List')),
-                 const SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
                 onPressed: () {
                   Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ListOfStudentsScreen(subject_name: '', subject_code: '', section_id: '', subject_id: '')),
-        );
+                    context,
+                    MaterialPageRoute(builder: (context) => AttendanceReport()),
+                  );
                 },
                 child: const Text('Attendance \n Report')),
           ])

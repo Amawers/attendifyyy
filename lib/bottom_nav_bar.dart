@@ -1,7 +1,7 @@
 import 'package:attendifyyy/core/dashboard.dart';
 import 'package:attendifyyy/core/settings.dart';
 import 'package:attendifyyy/scanning_qr/scan_qr.dart';
-import 'package:attendifyyy/student_creation/list_of_students.dart';
+import 'package:attendifyyy/attendance/attendance_list.dart';
 import 'package:flutter/material.dart';
 
 
