@@ -22,6 +22,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   /* List sa mga page which is an index gamiton para
   sa pag navigate kada page*/
+  /**/
   List<Widget> pages =  [
     DashboardScreen(),
     ScanQrScreen(),
