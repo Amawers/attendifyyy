@@ -103,6 +103,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
                 child: const Text('Attendance \n Report')),
+            const SizedBox(height: 30),
+            Text("testing")
           ])
         ],
       ),
