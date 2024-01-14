@@ -52,17 +52,17 @@ class _SignUpState extends State<SignUp> {
           //center signup fields or context vertically
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 150,
-              width: 200,
-              fit: BoxFit.contain,
-            ),
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 130,
+                  fit: BoxFit.contain,
+                ),
             TextField(
               controller: firstNameController,
               decoration: const InputDecoration(
                 labelText: "First Name",
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14), //affect the size of textfield
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 //when textField is focused or selected
                 focusedBorder: OutlineInputBorder(
@@ -72,15 +72,16 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             TextField(
               controller: lastNameController,
               decoration: const InputDecoration(
                 labelText: 'Last Name',
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -88,15 +89,16 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -104,15 +106,16 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             TextField(
               controller: passwordController,
               decoration: const InputDecoration(
                 labelText: 'Password',
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -120,15 +123,16 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             TextField(
               controller: phoneNumberController,
               decoration: const InputDecoration(
                 labelText: 'Phone Number',
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -136,15 +140,16 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             TextField(
               controller: departmentController,
               decoration: const InputDecoration(
                 labelText: 'Department',
-                labelStyle: TextStyle(color: Color(0xFFABABAB)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -152,21 +157,21 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
+                    BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: postSignUp,
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(
                       const Size.fromHeight(60)),
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
+                  MaterialStateProperty.all<Color>(const Color(0xFF081631)),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ))),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ))),
               child: const Text('SIGN UP',
                   style: TextStyle(
                     fontSize: 16.0,
@@ -174,7 +179,7 @@ class _SignUpState extends State<SignUp> {
                     fontWeight: FontWeight.bold,
                   )),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
