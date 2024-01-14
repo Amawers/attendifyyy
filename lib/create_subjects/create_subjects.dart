@@ -151,7 +151,7 @@ class _CreateSubject extends State<CreateSubject> {
                 onPressed: () {
                   createSubject();
                 },
-                child: const Text("Create"))
+                child: const Text("Create Subject"))
           ]))
         ],
       ),
