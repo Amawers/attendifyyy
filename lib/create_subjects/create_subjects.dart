@@ -60,7 +60,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
                 MaterialPageRoute(builder: (context) => const BottomNavBar()))),
         title: const Text('Subject List'),
       ),
-      body: ListView.builder(
+      body: (converted.isEmpty) ? const Center(child: Text('Empty')) : ListView.builder(
           padding: const EdgeInsets.all(14.0),
           itemCount: converted.length,
           itemBuilder: (context, index) {
@@ -122,7 +122,7 @@ class ListOfSubjectsWidget extends StatelessWidget {
             onPressed: () {
               showDialog(
                   context: context,
-                  builder: (BuildContext context) => Dialog(
+                  builder: (BuildContext context) => Dialog.fullscreen(
                       child: ListOfStudentsScreen(
                           section_id: section_id,
                           subject_code: subject_code,
@@ -242,6 +242,7 @@ class _CreateSubject extends State<CreateSubject> {
             TextButton(
                 onPressed: () {
                   createSubject();
+                  Navigator.of(context, rootNavigator: true).pop(); //close dialog
                 },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all<EdgeInsets>(
