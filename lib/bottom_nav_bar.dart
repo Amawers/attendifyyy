@@ -32,13 +32,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Present sa tanan pages kani na appbar
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: const Text('Attendify'),
-        elevation: 10,
-      ),
       // Body which mag determine kung unsa na nga page
       body: pages.elementAt(currentPage),
 
