@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +32,9 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
           .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
-          converted = jsonDecode(response.body);
+          setState(() {
+            converted = jsonDecode(response.body);
+          });
           print("Already converted from Json: ${converted}");
         } else {
           ScaffoldMessenger.of(context)
@@ -53,17 +55,18 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
       appBar: AppBar(
         leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                context, '/bottom_navbar', (route) => false)),
+            onPressed: () =>  Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const BottomNavBar()))),
         title: const Text('Class List'),
       ),
       body: ListView.builder(
           itemCount: converted.length,
           itemBuilder: (context, index) {
             return ListOfSubjectsWidget(
-                subject_name: converted[index]['subject_name'] ?? '',
-                subject_code: converted[index]['subject_code'] ?? '',
-                section_name: converted[index]['section_name'] ?? '',
+                subject_name: converted[index]['subject_name'] ?? 'tesssst',
+                subject_code: converted[index]['subject_code'] ?? 'tesssst',
+                section_name: converted[index]['section_name'] ?? 'tesssst',
+                section_id: converted[index]['section_id'] ?? 'tesssst',
                 subject_id: converted[index]['subject_id']);
           }),
       floatingActionButton: FloatingActionButton(
@@ -84,21 +87,23 @@ class ListOfSubjectsWidget extends StatelessWidget {
   String subject_name;
   String subject_code;
   String section_name;
+  String section_id;
   String subject_id;
 
   ListOfSubjectsWidget(
       {required this.subject_name,
       required this.subject_code,
       required this.section_name,
+      required this.section_id,
       required this.subject_id});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
         onPressed: () {
-          // showDialog(
-          //     context: context,
-          //     builder: (BuildContext context) => Dialog(child: StudentsList(subject_name: subject_name, subject_code: subject_code, section_id: section_id, subject_id: subject_id)));
+          showDialog(
+              context: context,
+              builder: (BuildContext context) => Dialog(child: ListOfStudentsScreen(section_id: section_id, subject_code: subject_code, subject_id: subject_id, subject_name: subject_name)));
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

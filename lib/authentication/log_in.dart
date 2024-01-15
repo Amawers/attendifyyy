@@ -54,6 +54,7 @@ class _LogInState extends State<LogIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -81,7 +82,7 @@ class _LogInState extends State<LogIn> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 20),
@@ -97,7 +98,7 @@ class _LogInState extends State<LogIn> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 40),
@@ -107,11 +108,11 @@ class _LogInState extends State<LogIn> {
                   minimumSize: MaterialStateProperty.all<Size>(
                       const Size.fromHeight(60)),
                   backgroundColor:
-                  MaterialStateProperty.all<Color>(const Color(0xFF081631)),
+                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ))),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ))),
               child: const Text('LOG IN',
                   style: TextStyle(
                     fontSize: 16.0,

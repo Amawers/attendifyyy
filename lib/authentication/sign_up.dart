@@ -45,24 +45,27 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(40.0),
         child: Column(
           //center signup fields or context vertically
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: 130,
-                  fit: BoxFit.contain,
-                ),
+            Image.asset(
+              'assets/images/logo.png',
+              height: 130,
+              fit: BoxFit.contain,
+            ),
             TextField(
               controller: firstNameController,
               decoration: const InputDecoration(
                 labelText: "First Name",
                 contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14), //affect the size of textfield
+                labelStyle: TextStyle(
+                    color: Color(0xFFABABAB),
+                    fontSize: 14), //affect the size of textfield
                 floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
                 //when textField is focused or selected
                 focusedBorder: OutlineInputBorder(
@@ -72,7 +75,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 12),
@@ -89,7 +92,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 12),
@@ -106,7 +109,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 12),
@@ -123,7 +126,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 12),
@@ -140,7 +143,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 12),
@@ -157,7 +160,7 @@ class _SignUpState extends State<SignUp> {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide:
-                    BorderSide(color: Color(0xFFABABAB))), // your color
+                        BorderSide(color: Color(0xFFABABAB))), // your color
               ),
             ),
             const SizedBox(height: 16),
@@ -167,11 +170,11 @@ class _SignUpState extends State<SignUp> {
                   minimumSize: MaterialStateProperty.all<Size>(
                       const Size.fromHeight(60)),
                   backgroundColor:
-                  MaterialStateProperty.all<Color>(const Color(0xFF081631)),
+                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ))),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ))),
               child: const Text('SIGN UP',
                   style: TextStyle(
                     fontSize: 16.0,
