@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../info_pages/privacy_policy.dart';
+
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -9,14 +11,14 @@ class SettingsScreen extends StatelessWidget {
         title: const Center(child: Text('Settings')),
       ),
       body: ListView(padding: const EdgeInsets.all(14.0), children: [
-        createSettingOptionCard(Icons.person, "Account", () {}),
+        createSettingOptionCard(Icons.person, "Account", () {}, context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
           indent: 10,
           endIndent: 10,
         ),
-        createSettingOptionCard(Icons.privacy_tip, "Privacy Policy", () {}),
+        createSettingOptionCard(Icons.privacy_tip, "Privacy Policy", const PrivacyPolicyScreen(), context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
@@ -24,14 +26,14 @@ class SettingsScreen extends StatelessWidget {
           endIndent: 10,
         ),
         createSettingOptionCard(
-            Icons.contact_support, "Contact Support", () {}),
+            Icons.contact_support, "Contact Support", () {}, context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
           indent: 10,
           endIndent: 10,
         ),
-        createSettingOptionCard(Icons.info, "About App", () {}),
+        createSettingOptionCard(Icons.info, "About App", () {}, context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
@@ -82,7 +84,7 @@ class SettingsScreen extends StatelessWidget {
  *
  *  */
 
-Widget createSettingOptionCard(materialIcon, label, onClickAction) {
+Widget createSettingOptionCard(materialIcon, label, onClickAction, context) {
   return TextButton(
       style: ButtonStyle(
           padding: const MaterialStatePropertyAll<EdgeInsets>(
@@ -91,7 +93,12 @@ Widget createSettingOptionCard(materialIcon, label, onClickAction) {
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(7.0),
               ))),
-      onPressed: () => onClickAction,
+      onPressed: () => {
+      Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => onClickAction),
+      )
+      },
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Row(children: [
           Icon(materialIcon, color: const Color(0xFF081631)),

@@ -193,7 +193,7 @@ Widget createStatsCard(
           children: [
             Icon(materialIcon, color: Colors.white),
             Text(label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10.0,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -202,7 +202,7 @@ Widget createStatsCard(
         ),
         //stats count
         Text('$count',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 50.0,
