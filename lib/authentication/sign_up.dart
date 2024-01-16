@@ -58,111 +58,17 @@ class _SignUpState extends State<SignUp> {
               height: 130,
               fit: BoxFit.contain,
             ),
-            TextField(
-              controller: firstNameController,
-              decoration: const InputDecoration(
-                labelText: "First Name",
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(
-                    color: Color(0xFFABABAB),
-                    fontSize: 14), //affect the size of textfield
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                //when textField is focused or selected
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                //normal state of textField border
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(firstNameController, "First Name"),
             const SizedBox(height: 12),
-            TextField(
-              controller: lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Last Name',
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(lastNameController, 'Last Name'),
             const SizedBox(height: 12),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(emailController, 'Email'),
             const SizedBox(height: 12),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(passwordController, 'Password'),
             const SizedBox(height: 12),
-            TextField(
-              controller: phoneNumberController,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(phoneNumberController, 'Phone Number'),
             const SizedBox(height: 12),
-            TextField(
-              controller: departmentController,
-              decoration: const InputDecoration(
-                labelText: 'Department',
-                contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                labelStyle: TextStyle(color: Color(0xFFABABAB), fontSize: 14),
-                floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide:
-                        BorderSide(color: Color(0xFFABABAB))), // your color
-              ),
-            ),
+            createTextField(departmentController, 'Department'),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: postSignUp,
@@ -210,4 +116,34 @@ class _SignUpState extends State<SignUp> {
       ),
     );
   }
+}
+
+
+/*
+*
+* Widget components
+*
+*
+* */
+Widget createTextField(valueController, label) {
+  return TextField(
+    controller: valueController,
+    decoration: InputDecoration(
+      labelText: label,
+      contentPadding: EdgeInsets.symmetric(horizontal: 15),
+      labelStyle: TextStyle(
+          color: Color(0xFFABABAB),
+          fontSize: 14), //affect the size of textfield
+      floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
+      //when textField is focused or selected
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+      //normal state of textField border
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide:
+          BorderSide(color: Color(0xFFABABAB))), // your color
+    ),
+  );
 }
