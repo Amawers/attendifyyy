@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> getTeacherName() async {
     Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
+    await RememberUserPreferences.readUserInfo();
     setState(() {
       teacherName = teacherInfo?['first_name'];
       teacherId = teacherInfo?['teacher_id'];
@@ -37,6 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -192,7 +193,7 @@ Widget createStatsCard(
           children: [
             Icon(materialIcon, color: Colors.white),
             Text(label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10.0,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -201,7 +202,7 @@ Widget createStatsCard(
         ),
         //stats count
         Text('$count',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 50.0,
@@ -223,9 +224,9 @@ Widget createListPageNavButton(
     },
     style: ButtonStyle(
         backgroundColor:
-            MaterialStateProperty.all<Color>(Color(backgroundColor)),
+        MaterialStateProperty.all<Color>(Color(backgroundColor)),
         padding:
-            MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(16.0)),
+        MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(16.0)),
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)))),
     child: Row(
