@@ -5,6 +5,7 @@ import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:math';
 
 class ListOfSubjects extends StatefulWidget {
   const ListOfSubjects({super.key});
@@ -54,12 +55,13 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () =>  Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const BottomNavBar()))),
-        title: const Text('Class List'),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const BottomNavBar()))),
+        title: const Text('Subject List'),
       ),
-      body: ListView.builder(
+      body: (converted.isEmpty) ? const Center(child: Text('Empty')) : ListView.builder(
+          padding: const EdgeInsets.all(14.0),
           itemCount: converted.length,
           itemBuilder: (context, index) {
             return ListOfSubjectsWidget(
@@ -69,15 +71,20 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
                 section_id: converted[index]['section_id'] ?? 'tesssst',
                 subject_id: converted[index]['subject_id']);
           }),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF081631),
         onPressed: () {
           showDialog(
               context: context,
               builder: (BuildContext context) =>
                   Dialog(child: CreateSubject()));
         },
-        child: const Text('Add Subject',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Subject',
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white)),
       ),
     );
   }
@@ -97,26 +104,64 @@ class ListOfSubjectsWidget extends StatelessWidget {
       required this.section_id,
       required this.subject_id});
 
+  Random random = Random();
+  var backgroundColors = [
+    const Color(0xFF081631),
+    const Color(0xFFCD00B9),
+    const Color(0xFFFF9900),
+    const Color(0xFFFF9900),
+    const Color(0xFF039000)
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) => Dialog(child: ListOfStudentsScreen(section_id: section_id, subject_code: subject_code, subject_id: subject_id, subject_name: subject_name)));
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(subject_name),
-              const SizedBox(width: 50),
-              Text(subject_code)
-            ]),
-            const SizedBox(height: 15),
-            Text(section_name)
-          ],
-        ));
+    return Container(
+        margin:
+            const EdgeInsets.only(bottom: 18.0), //spaces between subject cards
+        child: ElevatedButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) => Dialog.fullscreen(
+                      child: ListOfStudentsScreen(
+                          section_id: section_id,
+                          subject_code: subject_code,
+                          subject_id: subject_id,
+                          subject_name: subject_name)));
+            },
+            style: ButtonStyle(
+                minimumSize:
+                    MaterialStateProperty.all<Size>(const Size.fromHeight(100)),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    backgroundColors[random.nextInt(5)]),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(subject_name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24.0,
+                          )),
+                      Text(subject_code,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                          ))
+                    ]),
+                Text(section_name,
+                    style: const TextStyle(
+                      color: Color(0xDAEAEAEA),
+                      fontSize: 18.0,
+                    ))
+              ],
+            )));
   }
 }
 
@@ -151,36 +196,68 @@ class _CreateSubject extends State<CreateSubject> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,
+      height: 380,
+      padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          const Text('Create Class'),
+          const Text('ADD SUBJECT',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              )),
           Form(
               child: Column(children: [
             TextFormField(
               controller: subjectNameController,
-              decoration: const InputDecoration(hintText: 'Subject Name'),
+              decoration: const InputDecoration(
+                  hintText: 'Subject Name',
+                  hintStyle: TextStyle(
+                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             TextFormField(
               controller: subjectCodeController,
-              decoration: const InputDecoration(hintText: 'Subject Code'),
+              decoration: const InputDecoration(
+                  hintText: 'Subject Code',
+                  hintStyle: TextStyle(
+                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             TextFormField(
               controller: sectionNameController,
-              decoration: const InputDecoration(hintText: 'Section Name'),
+              decoration: const InputDecoration(
+                  hintText: 'Section',
+                  hintStyle: TextStyle(
+                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             TextFormField(
               controller: semesterController,
-              decoration: const InputDecoration(hintText: 'Semester'),
+              decoration: const InputDecoration(
+                  hintText: 'Semester',
+                  hintStyle: TextStyle(
+                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
             ),
-            ElevatedButton(
+            const SizedBox(height: 20.0),
+            TextButton(
                 onPressed: () {
                   createSubject();
+                  Navigator.of(context, rootNavigator: true).pop(); //close dialog
                 },
-                child: const Text("Create Subject"))
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all<EdgeInsets>(
+                      const EdgeInsets.symmetric(
+                          vertical: 14.0, horizontal: 44.0)),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    const Color(0xFF081631),
+                  ),
+                ),
+                child: const Text("Add",
+                    style: TextStyle(
+                        backgroundColor: Color(0xFF081631),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white))),
           ]))
         ],
       ),
