@@ -214,7 +214,7 @@ class _CreateStudentState extends State<CreateStudent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 550,
+      height: 580,
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
@@ -225,7 +225,8 @@ class _CreateStudentState extends State<CreateStudent> {
               )),
           Form(
               child: Column(children: [
-            createTextField(referenceNumberController, 'reference Number'),
+                const SizedBox(height: 14),
+            createTextField(referenceNumberController, 'Reference Number'),
             const SizedBox(height: 14),
             createTextField(firstNameController, 'First Name'),
             const SizedBox(height: 14),
@@ -265,12 +266,18 @@ class _CreateStudentState extends State<CreateStudent> {
                   setState(() {});
                 },
                 style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      const Size.fromHeight(55)), //having height will make width 100%
                   padding: MaterialStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(
                           vertical: 14.0, horizontal: 44.0)),
                   backgroundColor: MaterialStateProperty.all<Color>(
                     const Color(0xFF081631),
                   ),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
                 ),
                 child: const Text("Add",
                     style: TextStyle(
@@ -295,18 +302,17 @@ Widget createTextField(valueController, label) {
   return TextFormField(
     controller: valueController,
     decoration: InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
       hintText: label,
       hintStyle: const TextStyle(
           fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
-      focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0xFF081631),
-          width: 2.0,
-        ),
-      ),
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Color(0xFF8F8F8F)),
-      ),
+      focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+//normal state of textField border
+      enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFABABAB))),
     ),
   );
 }
