@@ -4,6 +4,8 @@ import 'package:attendifyyy/authentication/user_preferences/user_preferences.dar
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+List<String> gradeLevelList = <String>['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+
 class ListOfStudentsScreen extends StatefulWidget {
   String? subject_name;
   String? subject_code;
@@ -128,24 +130,27 @@ class ListOfStudentsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14.0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        color: const Color(0xff081631),
+        // borderRadius: BorderRadius.circular(10.0),
+        // color: const Color(0xff081631),
+        border: Border(
+          bottom: BorderSide(
+            width: 1,
+          )
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text("$first_name $last_name",
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(width: 50),
+                  color: Color(0xff081631),
+                  fontSize: 16.0)),
           Text(grade_level,
               style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF696969),
                   fontSize: 14.0)),
         ],
       ),
@@ -175,7 +180,8 @@ class _CreateStudentState extends State<CreateStudent> {
 
   TextEditingController courseController = TextEditingController();
 
-  TextEditingController gradeLevelController = TextEditingController();
+  //TextEditingController gradeLevelController = TextEditingController();
+  String gradeLevelValue = gradeLevelList.first;
 
   @override
   void initState() {
@@ -190,7 +196,7 @@ class _CreateStudentState extends State<CreateStudent> {
       'last_name': lastNameController.text,
       'email': emailController.text,
       'course': courseController.text,
-      'grade_level': gradeLevelController.text,
+      'grade_level': gradeLevelValue,
       'section_id': widget.section_id,
       'subject_id': widget.subject_id
     });
@@ -198,7 +204,7 @@ class _CreateStudentState extends State<CreateStudent> {
     if (response.statusCode == 200) {
       print(response.body);
     } else {
-      print("nag error conenct sa backend");
+      print("nag error connect sa backend");
     }
   }
 
@@ -264,13 +270,31 @@ class _CreateStudentState extends State<CreateStudent> {
                       fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
             ),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: gradeLevelController,
-              decoration: const InputDecoration(
-                  hintText: 'Year Level',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            // TextFormField(
+            //   controller: gradeLevelController,
+            //   decoration: const InputDecoration(
+            //       hintText: 'Year Level',
+            //       hintStyle: TextStyle(
+            //           fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
+            // ),
+              DropdownButton<String>(
+                isExpanded: true, //set width to 100%
+                value: gradeLevelValue,
+                icon: const Icon(Icons.arrow_drop_down),
+                elevation: 16,
+                onChanged: (String? value) {
+                  // This is called when the user selects an item.
+                  setState(() {
+                    gradeLevelValue = value!;
+                  });
+                },
+                items: gradeLevelList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 20),
             TextButton(
                 onPressed: () {
