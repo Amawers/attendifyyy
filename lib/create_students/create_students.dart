@@ -4,7 +4,13 @@ import 'package:attendifyyy/authentication/user_preferences/user_preferences.dar
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-List<String> gradeLevelList = <String>['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+List<String> gradeLevelList = <String>[
+  '1st Year',
+  '2nd Year',
+  '3rd Year',
+  '4th Year',
+  '5th Year'
+];
 
 class ListOfStudentsScreen extends StatefulWidget {
   String? subject_name;
@@ -86,16 +92,18 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       /*
       * display empty of studentlist is empty
       * */
-      body: (studentList.isEmpty) ? const Center(child: Text('Empty')) : ListView.builder(
-          padding: const EdgeInsets.all(14.0),
-          itemCount: studentList.length,
-          itemBuilder: (context, index) {
-            return ListOfStudentsWidget(
-                first_name: studentList[index]['first_name'] ?? 'No fname',
-                last_name: studentList[index]['last_name'] ?? 'No lname',
-                grade_level:
-                studentList[index]['grade_level'] ?? 'No grade level');
-          }),
+      body: (studentList.isEmpty)
+          ? const Center(child: Text('Empty'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(14.0),
+              itemCount: studentList.length,
+              itemBuilder: (context, index) {
+                return ListOfStudentsWidget(
+                    first_name: studentList[index]['first_name'] ?? 'No fname',
+                    last_name: studentList[index]['last_name'] ?? 'No lname',
+                    grade_level:
+                        studentList[index]['grade_level'] ?? 'No grade level');
+              }),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF081631),
         onPressed: () {
@@ -132,26 +140,21 @@ class ListOfStudentsWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10.0),
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         // borderRadius: BorderRadius.circular(10.0),
         // color: const Color(0xff081631),
         border: Border(
-          bottom: BorderSide(
-            width: 1,
-          )
-        ),
+            bottom: BorderSide(
+          width: 1,
+        )),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text("$first_name $last_name",
-              style: const TextStyle(
-                  color: Color(0xff081631),
-                  fontSize: 16.0)),
+              style: const TextStyle(color: Color(0xff081631), fontSize: 16.0)),
           Text(grade_level,
-              style: const TextStyle(
-                  color: Color(0xFF696969),
-                  fontSize: 14.0)),
+              style: const TextStyle(color: Color(0xFF696969), fontSize: 14.0)),
         ],
       ),
     );
@@ -222,84 +225,43 @@ class _CreateStudentState extends State<CreateStudent> {
               )),
           Form(
               child: Column(children: [
-            TextFormField(
-              controller: referenceNumberController,
-              decoration: const InputDecoration(
-                  hintText: 'reference Number',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(referenceNumberController, 'reference Number'),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: firstNameController,
-              decoration: const InputDecoration(
-                  hintText: 'First Name',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(firstNameController, 'First Name'),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: middleInitialController,
-              decoration: const InputDecoration(
-                  hintText: 'Middle Initial',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(middleInitialController, 'Middle Initial'),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: lastNameController,
-              decoration: const InputDecoration(
-                  hintText: 'Last Name',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(lastNameController, 'Last Name'),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                  hintText: 'Email',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(emailController, 'Last Name'),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: courseController,
-              decoration: const InputDecoration(
-                  hintText: 'Course',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(emailController, 'Course'),
             const SizedBox(height: 14),
-            // TextFormField(
-            //   controller: gradeLevelController,
-            //   decoration: const InputDecoration(
-            //       hintText: 'Year Level',
-            //       hintStyle: TextStyle(
-            //           fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            // ),
-              DropdownButton<String>(
-                isExpanded: true, //set width to 100%
-                value: gradeLevelValue,
-                icon: const Icon(Icons.arrow_drop_down),
-                elevation: 16,
-                onChanged: (String? value) {
-                  // This is called when the user selects an item.
-                  setState(() {
-                    gradeLevelValue = value!;
-                  });
-                },
-                items: gradeLevelList.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+            DropdownButton<String>(
+              isExpanded: true, //set width to 100%
+              value: gradeLevelValue,
+              icon: const Icon(Icons.arrow_drop_down),
+              elevation: 16,
+              onChanged: (String? value) {
+                // This is called when the user selects an item.
+                setState(() {
+                  gradeLevelValue = value!;
+                });
+              },
+              items:
+                  gradeLevelList.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 20),
             TextButton(
                 onPressed: () {
                   createStudent();
-                  Navigator.of(context, rootNavigator: true).pop(); //close dialog
+                  Navigator.of(context, rootNavigator: true)
+                      .pop(); //close dialog
                   setState(() {});
                 },
                 style: ButtonStyle(
@@ -321,4 +283,30 @@ class _CreateStudentState extends State<CreateStudent> {
       ),
     );
   }
+}
+
+/*
+*
+* Widget components
+*
+*
+* */
+Widget createTextField(valueController, label) {
+  return TextFormField(
+    controller: valueController,
+    decoration: InputDecoration(
+      hintText: label,
+      hintStyle: const TextStyle(
+          fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
+      focusedBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0xFF081631),
+          width: 2.0,
+        ),
+      ),
+      enabledBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: Color(0xFF8F8F8F)),
+      ),
+    ),
+  );
 }
