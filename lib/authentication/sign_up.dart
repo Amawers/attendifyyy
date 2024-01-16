@@ -130,17 +130,17 @@ Widget createTextField(valueController, label) {
     controller: valueController,
     decoration: InputDecoration(
       labelText: label,
-      contentPadding: EdgeInsets.symmetric(horizontal: 15),
-      labelStyle: TextStyle(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+      labelStyle: const TextStyle(
           color: Color(0xFFABABAB),
           fontSize: 14), //affect the size of textfield
-      floatingLabelStyle: TextStyle(color: Color(0xFF081631)),
+      floatingLabelStyle: const TextStyle(color: Color(0xFF081631)),
       //when textField is focused or selected
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
       //normal state of textField border
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           borderSide:
           BorderSide(color: Color(0xFFABABAB))), // your color

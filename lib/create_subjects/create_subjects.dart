@@ -5,7 +5,6 @@ import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:math';
 
 class ListOfSubjects extends StatefulWidget {
   const ListOfSubjects({super.key});
@@ -52,6 +51,11 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
 
   @override
   Widget build(BuildContext context) {
+    var backgroundColors = [
+      0xFF00315D,
+      0xFFA4C9FE,
+    ];
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -60,17 +64,21 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
                 MaterialPageRoute(builder: (context) => const BottomNavBar()))),
         title: const Text('Subject List'),
       ),
-      body: (converted.isEmpty) ? const Center(child: Text('Empty')) : ListView.builder(
-          padding: const EdgeInsets.all(14.0),
-          itemCount: converted.length,
-          itemBuilder: (context, index) {
-            return ListOfSubjectsWidget(
-                subject_name: converted[index]['subject_name'] ?? 'tesssst',
-                subject_code: converted[index]['subject_code'] ?? 'tesssst',
-                section_name: converted[index]['section_name'] ?? 'tesssst',
-                section_id: converted[index]['section_id'] ?? 'tesssst',
-                subject_id: converted[index]['subject_id']);
-          }),
+      body: (converted.isEmpty)
+          ? const Center(child: Text('Empty'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(14.0),
+              itemCount: converted.length,
+              itemBuilder: (context, index) {
+                return ListOfSubjectsWidget(
+                  subject_name: converted[index]['subject_name'] ?? 'tesssst',
+                  subject_code: converted[index]['subject_code'] ?? 'tesssst',
+                  section_name: converted[index]['section_name'] ?? 'tesssst',
+                  section_id: converted[index]['section_id'] ?? 'tesssst',
+                  subject_id: converted[index]['subject_id'],
+                  backgroundColor: backgroundColors[index % 2],
+                );
+              }),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF081631),
         onPressed: () {
@@ -96,22 +104,16 @@ class ListOfSubjectsWidget extends StatelessWidget {
   String section_name;
   String section_id;
   String subject_id;
+  int backgroundColor;
 
-  ListOfSubjectsWidget(
-      {required this.subject_name,
-      required this.subject_code,
-      required this.section_name,
-      required this.section_id,
-      required this.subject_id});
-
-  Random random = Random();
-  var backgroundColors = [
-    const Color(0xFF081631),
-    const Color(0xFFCD00B9),
-    const Color(0xFFFF9900),
-    const Color(0xFFFF9900),
-    const Color(0xFF039000)
-  ];
+  ListOfSubjectsWidget({
+    required this.subject_name,
+    required this.subject_code,
+    required this.section_name,
+    required this.section_id,
+    required this.subject_id,
+    required this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,10 +132,12 @@ class ListOfSubjectsWidget extends StatelessWidget {
                           subject_name: subject_name)));
             },
             style: ButtonStyle(
+                padding: MaterialStateProperty.all<EdgeInsets>(
+                    const EdgeInsets.all(16.0)),
                 minimumSize:
                     MaterialStateProperty.all<Size>(const Size.fromHeight(100)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    backgroundColors[random.nextInt(5)]),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Color(backgroundColor)),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.0),
@@ -141,25 +145,33 @@ class ListOfSubjectsWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(subject_name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24.0,
+                    )),
+                const SizedBox(height: 10.0),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(subject_name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24.0,
-                          )),
                       Text(subject_code,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xDAEAEAEA),
                             fontSize: 20.0,
-                          ))
+                          )),
+                      Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 6.0, horizontal: 14.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Text(section_name,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20.0,
+                              )))
                     ]),
-                Text(section_name,
-                    style: const TextStyle(
-                      color: Color(0xDAEAEAEA),
-                      fontSize: 18.0,
-                    ))
               ],
             )));
   }
@@ -196,7 +208,7 @@ class _CreateSubject extends State<CreateSubject> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 380,
+      height: 400,
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
@@ -207,55 +219,39 @@ class _CreateSubject extends State<CreateSubject> {
               )),
           Form(
               child: Column(children: [
-            TextFormField(
-              controller: subjectNameController,
-              decoration: const InputDecoration(
-                  hintText: 'Subject Name',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: subjectCodeController,
-              decoration: const InputDecoration(
-                  hintText: 'Subject Code',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(subjectNameController, "Subject Name"),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: sectionNameController,
-              decoration: const InputDecoration(
-                  hintText: 'Section',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(subjectCodeController, "Subject Code"),
             const SizedBox(height: 14),
-            TextFormField(
-              controller: semesterController,
-              decoration: const InputDecoration(
-                  hintText: 'Semester',
-                  hintStyle: TextStyle(
-                      fontWeight: FontWeight.normal, color: Color(0xFFABABAB))),
-            ),
+            createTextField(sectionNameController, "Section"),
+            const SizedBox(height: 14),
+            createTextField(semesterController, "Semester"),
             const SizedBox(height: 20.0),
-            TextButton(
+                TextButton(
                 onPressed: () {
                   createSubject();
-                  Navigator.of(context, rootNavigator: true).pop(); //close dialog
+                  Navigator.of(context, rootNavigator: true)
+                      .pop(); //close dialog
                 },
                 style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      const Size.fromHeight(55)), //having height will make width 100%
                   padding: MaterialStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(
                           vertical: 14.0, horizontal: 44.0)),
                   backgroundColor: MaterialStateProperty.all<Color>(
                     const Color(0xFF081631),
                   ),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        )),
                 ),
                 child: const Text("Add",
                     style: TextStyle(
                         backgroundColor: Color(0xFF081631),
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white))),
           ]))
@@ -263,4 +259,30 @@ class _CreateSubject extends State<CreateSubject> {
       ),
     );
   }
+}
+
+/*
+*
+* Widget components
+*
+*
+* */
+Widget createTextField(valueController, label) {
+  return TextFormField(
+    controller: valueController,
+    decoration: InputDecoration(
+        hintText: label,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
+        hintStyle: const TextStyle(
+            fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
+      focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+//normal state of textField border
+      enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide:
+          BorderSide(color: Color(0xFFABABAB))), // your color
+    ),
+    );
 }
