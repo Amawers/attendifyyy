@@ -1,6 +1,7 @@
+import 'package:attendifyyy/info_pages/privacy_policy.dart';
 import 'package:flutter/material.dart';
 
-import '../info_pages/privacy_policy.dart';
+// import '../info_pages/privacy_policy.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
