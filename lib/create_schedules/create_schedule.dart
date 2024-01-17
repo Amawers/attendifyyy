@@ -140,7 +140,23 @@ class CreateSchedule extends StatelessWidget {
   TextEditingController endTimeController = TextEditingController();
   TextEditingController dayWeekController = TextEditingController();
 
-  Future<void> createSchedule(BuildContext context) async {}
+  Future<void> createSchedule() async {
+     Map<String, dynamic>? teacherInfo =
+    await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    final response = await http.post(Uri.parse(Api.createSchedule), 
+    body: {
+      'teacher_id': teacherId,
+      'subject_name': subjectNameController.text,
+      'section_name': sectionNameController.text,
+      'start_time': startTimeController.text,
+      'end_time': endTimeController.text,
+      'days_of_week': dayWeekController.text
+    });
+    print(response.body);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +193,7 @@ class CreateSchedule extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () {
-                  createSchedule(context);
+                  createSchedule();
                 },
                 child: const Text("Create"))
           ]))
