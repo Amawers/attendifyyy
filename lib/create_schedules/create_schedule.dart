@@ -25,10 +25,17 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
   }
 
   Future<void> getListOfSchedules() async {
-    Map<String, dynamic>? teacherInfo =
+    String? teacherId;
+    try {
+      Map<String, dynamic>? teacherInfo =
         await RememberUserPreferences.readUserInfo();
+        
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error){
+      print("Error lods: $error");
+    }
 
-    String? teacherId = teacherInfo?['teacher_id'];
+    
     final response = await http.get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
