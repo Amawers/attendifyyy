@@ -40,7 +40,7 @@ CREATE TABLE students (
     reference_number VARCHAR(255),
     middle_initial VARCHAR(255),
     course VARCHAR(255)
-) 
+);
 
 CREATE TABLE student_subjects (
     student_subjects_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,4 +50,17 @@ CREATE TABLE student_subjects (
     constraint student_subjects_section_id_fkey foreign key (section_id) references sections (section_id),
     constraint student_subjects_student_id_fkey foreign key (student_id) references students (student_id),
     constraint student_subjects_subject_id_fkey foreign key (subject_id) references subjects (subject_id)
-)
+);
+
+CREATE TABLE class_schedules (
+    schedule_id INT AUTO_INCREMENT PRIMARY KEY,
+    teacher_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    section_id INT NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    day_of_week TEXT,
+    CONSTRAINT class_schedules_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES subjects (subject_id),
+    CONSTRAINT class_schedules_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES teachers (teacher_id),
+    CONSTRAINT class_schedules_section_id_fkey FOREIGN KEY (section_id) REFERENCES sections (section_id)
+);

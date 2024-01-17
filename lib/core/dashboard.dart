@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:attendifyyy/attendance/attendance_list.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/create_schedules/create_schedule.dart';
 import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:attendifyyy/create_subjects/create_subjects.dart';
 import 'package:flutter/material.dart';
@@ -124,8 +125,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Icons.subject, "Subject List"),
             //spaces between buttons
             const SizedBox(height: 7),
-            createListPageNavButton(context, () {}, 0xFFFF9900, Icons.schedule,
-                "Schedule List"), //!!!for the mean time this button will cause an error when press because function is empty
+            createListPageNavButton(context, ListOfSchedules(), 0xFFFF9900, Icons.schedule,
+                "Schedule List"), //! kani na list of schedules styli na, okay na backend
             //spaces between buttons
             const SizedBox(height: 7),
             createListPageNavButton(context, AttendanceReport(), 0xFF039000,
