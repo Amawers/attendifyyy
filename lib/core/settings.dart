@@ -1,4 +1,5 @@
-import 'package:attendifyyy/info_pages/privacy_policy.dart';
+import 'package:attendifyyy/core/account_settings/account_settings.dart';
+import 'package:attendifyyy/core/info_pages/privacy_policy.dart';
 import 'package:flutter/material.dart';
 
 // import '../info_pages/privacy_policy.dart';
@@ -12,7 +13,7 @@ class SettingsScreen extends StatelessWidget {
         title: const Center(child: Text('Settings')),
       ),
       body: ListView(padding: const EdgeInsets.all(14.0), children: [
-        createSettingOptionCard(Icons.person, "Account", () {}, context),
+        createSettingOptionCard(Icons.person, "Account", const AccountSettings(), context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
