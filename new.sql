@@ -64,3 +64,12 @@ CREATE TABLE class_schedules (
     CONSTRAINT class_schedules_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES teachers (teacher_id),
     CONSTRAINT class_schedules_section_id_fkey FOREIGN KEY (section_id) REFERENCES sections (section_id)
 );
+
+CREATE TABLE attendance (
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id INT NOT NULL,
+    attendance_date DATE NOT NULL,
+    attendance_time time NOT null,
+    attendance_status text NOT null,
+    constraint attendance_schedule_id_fkey foreign key (schedule_id) references class_schedules (schedule_id)
+);
