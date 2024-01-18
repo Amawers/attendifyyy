@@ -10,4 +10,6 @@ class Api {
   static const createStudent = '$hostConnect/create_student/create_students.php';
   static const listOfSchedules = '$hostConnect/create_schedule/schedules_list.php';
   static const createSchedule = '$hostConnect/create_schedule/create_schedule.php';
+  static const listOfAttendance = '$hostConnect/attendance/attendance_list.php';
+  static const createAttendance = '$hostConnect/attendance/create_attendance.php';
 }
