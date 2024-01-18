@@ -19,9 +19,9 @@ class ListOfStudentsScreen extends StatefulWidget {
   String? subject_id;
   ListOfStudentsScreen(
       {required this.subject_name,
-        required this.subject_code,
-        required this.section_id,
-        required this.subject_id});
+      required this.subject_code,
+      required this.section_id,
+      required this.subject_id});
 
   @override
   State<ListOfStudentsScreen> createState() => _ListOfStudentsScreenState();
@@ -38,7 +38,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
 
   Future<void> getListOfStudents() async {
     Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
+        await RememberUserPreferences.readUserInfo();
 
     String teacherId = teacherInfo?['teacher_id'];
 
@@ -50,7 +50,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
     };
     try {
       final response =
-      await http.get(Uri.parse(Api.listOfStudents), headers: headers);
+          await http.get(Uri.parse(Api.listOfStudents), headers: headers);
 
       if (response.statusCode == 200) {
         setState(() {
@@ -73,7 +73,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context)),
           title:
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text(
               'Student List',
               style: TextStyle(
@@ -95,15 +95,15 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       body: (studentList.isEmpty)
           ? const Center(child: Text('Empty'))
           : ListView.builder(
-          padding: const EdgeInsets.all(14.0),
-          itemCount: studentList.length,
-          itemBuilder: (context, index) {
-            return ListOfStudentsWidget(
-                first_name: studentList[index]['first_name'] ?? 'No fname',
-                last_name: studentList[index]['last_name'] ?? 'No lname',
-                grade_level:
-                studentList[index]['grade_level'] ?? 'No grade level');
-          }),
+              padding: const EdgeInsets.all(14.0),
+              itemCount: studentList.length,
+              itemBuilder: (context, index) {
+                return ListOfStudentsWidget(
+                    first_name: studentList[index]['first_name'] ?? 'No fname',
+                    last_name: studentList[index]['last_name'] ?? 'No lname',
+                    grade_level:
+                        studentList[index]['grade_level'] ?? 'No grade level');
+              }),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF081631),
         onPressed: () {
@@ -132,29 +132,42 @@ class ListOfStudentsWidget extends StatelessWidget {
 
   ListOfStudentsWidget(
       {required this.first_name,
-        required this.last_name,
-        required this.grade_level});
+      required this.last_name,
+      required this.grade_level});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10.0),
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-      decoration: const BoxDecoration(
-        // borderRadius: BorderRadius.circular(10.0),
-        // color: const Color(0xff081631),
-        border: Border(
-            bottom: BorderSide(
-              width: 1,
-            )),
+      decoration: BoxDecoration(
+        color: const Color(0xff081631),
+        borderRadius: BorderRadius.circular(14.0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("$first_name $last_name",
-              style: const TextStyle(color: Color(0xff081631), fontSize: 16.0)),
-          Text(grade_level,
-              style: const TextStyle(color: Color(0xFF696969), fontSize: 14.0)),
+          Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+            Text(first_name,
+                style:
+                    const TextStyle(color: Colors.white, fontSize: 18.0)),
+            Text(last_name,
+                style:
+                    const TextStyle(color: Colors.white, fontSize: 18.0)),
+          ]),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 6.0, horizontal: 14.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Text(grade_level,
+                style:
+                    const TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold)),
+          )
         ],
       ),
     );
@@ -225,67 +238,68 @@ class _CreateStudentState extends State<CreateStudent> {
               )),
           Form(
               child: Column(children: [
-                const SizedBox(height: 14),
-                createTextField(referenceNumberController, 'Reference Number'),
-                const SizedBox(height: 14),
-                createTextField(firstNameController, 'First Name'),
-                const SizedBox(height: 14),
-                createTextField(middleInitialController, 'Middle Initial'),
-                const SizedBox(height: 14),
-                createTextField(lastNameController, 'Last Name'),
-                const SizedBox(height: 14),
-                createTextField(emailController, 'Email'),
-                const SizedBox(height: 14),
-                createTextField(courseController, 'Course'),
-                const SizedBox(height: 14),
-                DropdownButton<String>(
-                  isExpanded: true, //set width to 100%
-                  value: gradeLevelValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  elevation: 16,
-                  onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      gradeLevelValue = value!;
-                    });
-                  },
-                  items:
+            const SizedBox(height: 14),
+            createTextField(referenceNumberController, 'Reference Number'),
+            const SizedBox(height: 14),
+            createTextField(firstNameController, 'First Name'),
+            const SizedBox(height: 14),
+            createTextField(middleInitialController, 'Middle Initial'),
+            const SizedBox(height: 14),
+            createTextField(lastNameController, 'Last Name'),
+            const SizedBox(height: 14),
+            createTextField(emailController, 'Email'),
+            const SizedBox(height: 14),
+            createTextField(courseController, 'Course'),
+            const SizedBox(height: 14),
+            DropdownButton<String>(
+              isExpanded: true, //set width to 100%
+              value: gradeLevelValue,
+              icon: const Icon(Icons.arrow_drop_down),
+              elevation: 16,
+              onChanged: (String? value) {
+                // This is called when the user selects an item.
+                setState(() {
+                  gradeLevelValue = value!;
+                });
+              },
+              items:
                   gradeLevelList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+                onPressed: () {
+                  createStudent();
+                  Navigator.of(context, rootNavigator: true)
+                      .pop(); //close dialog
+                  setState(() {});
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      const Size.fromHeight(
+                          55)), //having height will make width 100%
+                  padding: MaterialStateProperty.all<EdgeInsets>(
+                      const EdgeInsets.symmetric(
+                          vertical: 14.0, horizontal: 44.0)),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    const Color(0xFF081631),
+                  ),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  )),
                 ),
-                const SizedBox(height: 20),
-                TextButton(
-                    onPressed: () {
-                      createStudent();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
-                      setState(() {});
-                    },
-                    style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all<Size>(
-                          const Size.fromHeight(55)), //having height will make width 100%
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 44.0)),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color(0xFF081631),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          )),
-                    ),
-                    child: const Text("Add",
-                        style: TextStyle(
-                            backgroundColor: Color(0xFF081631),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)))
-              ]))
+                child: const Text("Add",
+                    style: TextStyle(
+                        backgroundColor: Color(0xFF081631),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)))
+          ]))
         ],
       ),
     );
