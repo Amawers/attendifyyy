@@ -6,7 +6,7 @@ import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-List<String> semesterList = <String>["1", "2"];
+List<String> semesterList = <String>["1st Semester", "2nd Semester"];
 
 class ListOfSubjects extends StatefulWidget {
   const ListOfSubjects({super.key});
