@@ -96,7 +96,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       body: (studentList.isEmpty)
           ? const Center(child: Text('Empty'))
           : ListView.builder(
-          padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 90.0),
+              padding: const EdgeInsets.all(14.0),
               itemCount: studentList.length,
               itemBuilder: (context, index) {
                 return ListOfStudentsWidget(
