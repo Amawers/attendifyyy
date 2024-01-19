@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/utils/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -16,28 +21,49 @@ class _AccountSettingsState extends State<AccountSettings> {
   TextEditingController contactNoController = TextEditingController();
   TextEditingController departmentController = TextEditingController();
 
+  List<dynamic> teacherData = [];
+
   @override
   void initState() {
     super.initState();
+    getTeacherData();
+  }
 
-    fnameController.text = 'Coco';
-    lnameController.text = 'Mahtin';
-    emailController.text = 'MahtinCoco@gmail.com';
-    passwordController.text = 'imissu123';
-    contactNoController.text = '096537439932';
-    departmentController.text = 'Information Technology';
+  Future<void> getTeacherData() async {
+    String? teacherId;
+    try {
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error lods: $error");
+    }
+
+    final response = await http
+        .get(Uri.parse('${Api.getTeacherData}?teacher_id=$teacherId'));
+
+    teacherData = jsonDecode(response.body);
+    print("teacher data luds $teacherData");
+    fnameController.text = teacherData[0]['first_name'];
+    lnameController.text = teacherData[0]['last_name'];
+    emailController.text = teacherData[0]['email'];
+    // passwordController.text = teacherData[0];
+    contactNoController.text = teacherData[0]['phone_number'];
+    departmentController.text = teacherData[0]['department'];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(),
       body: Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
             width: double.infinity,
-            height: 150,
+            height: 80,
             color: TAppTheme.primaryColor,
           ),
 
@@ -47,17 +73,17 @@ class _AccountSettingsState extends State<AccountSettings> {
             children: [
               // Profile picture of the account
               Padding(
-                padding: const EdgeInsets.only(top: 90.0),
+                padding: const EdgeInsets.only(top: 30.0),
                 child: Center(
                   child: Container(
-                    width: 120.0,
-                    height: 120.0,
+                    width: 110.0,
+                    height: 110.0,
                     child: const ClipOval(
                       child: CircleAvatar(
                         radius: 60.0,
                         backgroundColor: Colors.grey,
-                        backgroundImage:
-                            NetworkImage('https://picsum.photos/250?image=9'),
+                        // backgroundImage:
+                        //     NetworkImage('https://picsum.photos/250?image=9'),
                       ),
                     ),
                   ),
@@ -72,41 +98,43 @@ class _AccountSettingsState extends State<AccountSettings> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // First Name Field
-                    createLabel('First Name:'),
                     const SizedBox(height: 5),
                     createTextField(
                         fnameController, 'First Name', Icons.person),
                     const SizedBox(height: 12),
 
                     // Last Name Field
-                    createLabel('Last Name:'),
-                    const SizedBox(height: 5,),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     createTextField(lnameController, 'Last Name', Icons.person),
                     const SizedBox(height: 12),
 
                     //Email Field
-                    createLabel('Email:'),
-                    const SizedBox(height: 5,),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     createTextField(emailController, 'Email', Icons.email),
                     const SizedBox(height: 12),
 
                     // Password Field
                     // Need to be obscured so separate jud siya sa createTextField na widget
-                    createLabel('Password:'),
-                    const SizedBox(height: 5,),
-                    createTextField(passwordController, 'Password', Icons.lock),
-                    const SizedBox(height: 12),
+                    // const SizedBox(height: 5,),
+                    // createTextField(passwordController, 'Password', Icons.lock),
+                    // const SizedBox(height: 12),
 
                     // Contact Number Field
-                    createLabel('Contact Number:'),
-                    const SizedBox(height: 5,),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     createTextField(
                         contactNoController, 'Contact No.', Icons.phone),
                     const SizedBox(height: 12),
 
                     // Department Field
-                    createLabel('Department:'),
-                    const SizedBox(height: 5,),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     createTextField(
                         departmentController, 'Department', Icons.house),
                     const SizedBox(height: 40),
@@ -154,7 +182,7 @@ Widget createLabel(label) {
       fontWeight: FontWeight.bold,
       fontSize: 14,
     ),
-  );  
+  );
 }
 
 // Widget for form fields
@@ -162,6 +190,7 @@ Widget createTextField(valueController, label, icon) {
   return TextFormField(
     controller: valueController,
     decoration: InputDecoration(
+      labelText: label,
       prefixIcon: Icon(icon),
       contentPadding: const EdgeInsets.symmetric(horizontal: 15),
       labelStyle: const TextStyle(
