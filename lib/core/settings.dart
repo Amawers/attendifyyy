@@ -1,4 +1,5 @@
 import 'package:attendifyyy/authentication/log_in.dart';
+import 'package:attendifyyy/core/account_settings/account_settings.dart';
 import 'package:attendifyyy/core/info_pages/about_app.dart';
 import 'package:attendifyyy/core/info_pages/contact_support.dart';
 import 'package:attendifyyy/core/info_pages/privacy_policy.dart';
@@ -17,7 +18,7 @@ class SettingsScreen extends StatelessWidget {
         title: const Text('Settings'),
       ),
       body: ListView(padding: const EdgeInsets.all(14.0), children: [
-        createSettingOptionCard(Icons.person, "Account", () {}, context),
+        createSettingOptionCard(Icons.person, "Account", const AccountSettings(), context),
         const Divider(
           color: Color(0xffeaeaea),
           thickness: 1,
