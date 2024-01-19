@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/authentication/sign_up.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,10 @@ class _LogInState extends State<LogIn> {
                 ),
                 TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUp()),
+                      );
                     },
                     style: ButtonStyle(
                       //this padding is the distance between ...account? and Sign up text
