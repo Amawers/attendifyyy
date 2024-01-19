@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/core/account_settings/image_upload.dart';
 import 'package:attendifyyy/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -75,18 +76,46 @@ class _AccountSettingsState extends State<AccountSettings> {
               Padding(
                 padding: const EdgeInsets.only(top: 30.0),
                 child: Center(
-                  child: Container(
-                    width: 110.0,
-                    height: 110.0,
-                    child: const ClipOval(
-                      child: CircleAvatar(
-                        radius: 60.0,
-                        backgroundColor: Colors.grey,
-                        // backgroundImage:
-                        //     NetworkImage('https://picsum.photos/250?image=9'),
+                  child: Stack(children: [
+                    Container(
+                      width: 110.0,
+                      height: 110.0,
+                      child: const ClipOval(
+                        child: CircleAvatar(
+                          radius: 60.0,
+                          backgroundColor: Colors.grey,
+                          // backgroundImage:
+                          //     NetworkImage('https://picsum.photos/250?image=9'),
+                        ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ImageUpload()),
+                          );
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 4, color: Colors.white),
+                            color: Colors.blue,
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                  ]),
                 ),
               ),
 
