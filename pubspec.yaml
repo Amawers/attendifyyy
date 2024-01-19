@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   shared_preferences: ^2.2.2
+  mobile_scanner: ^3.4.1
+  email_validator: '^2.1.16'
 
 dev_dependencies:
   flutter_test:
