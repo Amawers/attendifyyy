@@ -55,7 +55,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
             ),
           ],
           currentIndex: currentPage,
-          showUnselectedLabels: true,
+          selectedLabelStyle: const TextStyle(
+            color: Color(0xFF081631), // Change the color for the selected label
+            fontWeight: FontWeight.bold, // Add any other styles as needed
+          ),
           /* Logic para sa pag change sa page, basically alisdan ra ang integer value 
           sa currentpage which is kada value ga represent ug page based sa list sa taas*/
           onTap: (int value) {
