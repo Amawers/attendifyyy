@@ -69,7 +69,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
       body: (converted.isEmpty)
           ? const Center(child: Text('Empty'))
           : ListView.builder(
-          padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 90.0),
+              padding: const EdgeInsets.all(14.0),
               itemCount: converted.length,
               itemBuilder: (context, index) {
                 return ListOfSubjectsWidget(
@@ -201,13 +201,11 @@ class _CreateSubject extends State<CreateSubject> {
       'teacher_id': teacherId,
       'subject_name': subjectNameController.text,
       'subject_code': subjectCodeController.text,
-      'section_name': sectionNameController.text.toUpperCase(),
+      'section_name': sectionNameController.text,
       'semester': semesterValue
     });
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('${response.body}')));
-
-    print(sectionNameController.text.toUpperCase());
   }
 
   @override
