@@ -6,6 +6,8 @@ import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+List<String> semesterList = <String>["1", "2"];
+
 class ListOfSubjects extends StatefulWidget {
   const ListOfSubjects({super.key});
 
@@ -35,7 +37,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
           setState(() {
             converted = jsonDecode(response.body);
           });
-          print("Already converted from Json: ${converted}");
+          print("Already converted from Json: $converted");
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text("No subjects")));
@@ -186,7 +188,8 @@ class _CreateSubject extends State<CreateSubject> {
   TextEditingController subjectNameController = TextEditingController();
   TextEditingController subjectCodeController = TextEditingController();
   TextEditingController sectionNameController = TextEditingController();
-  TextEditingController semesterController = TextEditingController();
+  String semesterValue = semesterList.first;
+  final _subjectFormKey = GlobalKey<FormState>();
 
   Future<void> createSubject() async {
     Map<String, dynamic>? teacherInfo =
@@ -199,7 +202,7 @@ class _CreateSubject extends State<CreateSubject> {
       'subject_name': subjectNameController.text,
       'subject_code': subjectCodeController.text,
       'section_name': sectionNameController.text,
-      'semester': semesterController.text
+      'semester': semesterValue
     });
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('${response.body}')));
@@ -218,43 +221,85 @@ class _CreateSubject extends State<CreateSubject> {
                 fontSize: 16.0,
               )),
           Form(
+              key: _subjectFormKey,
               child: Column(children: [
-            const SizedBox(height: 14),
-            createTextField(subjectNameController, "Subject Name"),
-            const SizedBox(height: 14),
-            createTextField(subjectCodeController, "Subject Code"),
-            const SizedBox(height: 14),
-            createTextField(sectionNameController, "Section"),
-            const SizedBox(height: 14),
-            createTextField(semesterController, "Semester"),
-            const SizedBox(height: 20.0),
-                TextButton(
-                onPressed: () {
-                  createSubject();
-                  Navigator.of(context, rootNavigator: true)
-                      .pop(); //close dialog
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(
-                      const Size.fromHeight(55)), //having height will make width 100%
-                  padding: MaterialStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.symmetric(
-                          vertical: 14.0, horizontal: 44.0)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color(0xFF081631),
-                  ),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        )),
+                const SizedBox(height: 14),
+                createTextField(subjectNameController, "Subject Name", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(subjectCodeController, "Subject Code", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  else if(value.length > 10) {
+                    return "Character limit exceeded.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(sectionNameController, "Section", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                DropdownButton<String>(
+                  isExpanded: true, //set width to 100%
+                  value: semesterValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  elevation: 16,
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      semesterValue = value!;
+                    });
+                  },
+                  items: semesterList
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                 ),
-                child: const Text("Add",
-                    style: TextStyle(
-                        backgroundColor: Color(0xFF081631),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white))),
-          ]))
+                const SizedBox(height: 20.0),
+                TextButton(
+                    onPressed: () {
+                      //validate textfields
+                      if (_subjectFormKey.currentState!.validate()) {
+                        //create subject in the database
+                        createSubject();
+                        Navigator.of(context, rootNavigator: true)
+                            .pop(); //close dialog
+                      }
+                    },
+                    style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all<Size>(
+                          const Size.fromHeight(
+                              55)), //having height will make width 100%
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(
+                              vertical: 14.0, horizontal: 44.0)),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color(0xFF081631),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
+                    ),
+                    child: const Text("Add",
+                        style: TextStyle(
+                            backgroundColor: Color(0xFF081631),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white))),
+              ]))
         ],
       ),
     );
@@ -267,22 +312,28 @@ class _CreateSubject extends State<CreateSubject> {
 *
 *
 * */
-Widget createTextField(valueController, label) {
+Widget createTextField(valueController, label, validationFunction) {
   return TextFormField(
-    controller: valueController,
-    decoration: InputDecoration(
+      validator: validationFunction,
+      controller: valueController,
+      decoration: InputDecoration(
         hintText: label,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
         hintStyle: const TextStyle(
             fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
-      focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-//normal state of textField border
-      enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide:
-          BorderSide(color: Color(0xFFABABAB))), // your color
-    ),
-    );
+        focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+        //normal state of textField border
+        enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(color: Color(0xFFABABAB))),
+        //border style when error
+        errorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(color: Color(0xFFFF0000))),
+        focusedErrorBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
+      ));
 }
