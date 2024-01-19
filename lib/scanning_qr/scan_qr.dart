@@ -1,4 +1,10 @@
+import 'dart:convert';
+
+import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScanQrScreen extends StatefulWidget {
   @override
@@ -15,6 +21,69 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   List<dynamic> converted = [];
 
   @override
+  void initState() {
+    super.initState();
+    getListOfSchedules();
+  }
+
+  Future<void> getListOfSchedules() async {
+    String? teacherId;
+    try {
+      Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+        
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error){
+      print("Error lods: $error");
+    }
+
+    final response = await http.get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          converted = jsonDecode(response.body);
+          print("list of schedules if nakuha ba: ${converted}");
+          setState(() {
+            schedules = List<String>.from(converted
+                .map((dynamic subject) => subject['schedule_id'].toString()));
+          });
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("No schedules")));
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+      }
+  }
+
+  Future<void> processResult(String? result) async {
+    if (result != null) {
+      List<String> attributes = result.split('\t');
+
+      if (attributes.length == 5) {
+        id = attributes[0];
+        String firstName = attributes[1];
+        String? middleInitial =
+            attributes[2]?.isNotEmpty == true ? attributes[2] : null;
+        String lastName = attributes[3];
+        String course = attributes[4];
+        // Values are printed inside the debug console to check if it has successfully retrieved information from a QR Code after scanning.
+        print('Barcode Found!');
+        print(
+            'ID: $id\nFirst Name: $firstName\nMiddle Initial: ${middleInitial ?? ''}\nLast Name: $lastName\nCourse: $course');
+
+        final response = await http.post(Uri.parse(Api.createAttendance),
+            body: {
+              'schedule_id': selectedSchedule,
+              'reference_number': id
+        });
+      } else {
+        print('Not valid.');
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -29,16 +98,16 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                 alignment: Alignment.bottomCenter,
                 children: [
                   // // This is THE Scanner/Camera with scanning functionality using the pre-built onDetect function of the mobile_scanner package.
-                  // MobileScanner(
-                  //   controller: MobileScannerController(
-                  //       detectionSpeed: DetectionSpeed.noDuplicates),
-                  //   onDetect: (capture) {
-                  //     final List<Barcode> barcodes = capture.barcodes;
-                  //     for (final barcode in barcodes) {
-                  //       processResult(barcode.rawValue);
-                  //     }
-                  //   },
-                  // ),
+                  MobileScanner(
+                    controller: MobileScannerController(
+                        detectionSpeed: DetectionSpeed.noDuplicates),
+                    onDetect: (capture) {
+                      final List<Barcode> barcodes = capture.barcodes;
+                      for (final barcode in barcodes) {
+                        processResult(barcode.rawValue);
+                      }
+                    },
+                  ),
                   // Design overlay for the QR Scanner.
                   const ScanQrOverlay(
                       overlayColour: Color.fromARGB(255, 255, 255, 255)),
@@ -56,7 +125,8 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
             // Container where we can add elements below the QR scanner
             DropdownButton(
               items: schedules.map((String schedules) {
-                return DropdownMenuItem(value: schedules, child: Text(schedules));
+                return DropdownMenuItem(
+                    value: schedules, child: Text(schedules));
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {

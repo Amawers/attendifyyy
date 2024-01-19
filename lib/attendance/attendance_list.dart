@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AttendanceReport extends StatefulWidget {
   @override
@@ -7,25 +12,69 @@ class AttendanceReport extends StatefulWidget {
 }
 
 class _AttendanceReportState extends State<AttendanceReport> {
+  List<dynamic> converted = [];
   List<String> subjects = [];
-  List<String> sections = [];
   String? selectedSubject;
-  String? selectedSection;
 
   List<dynamic> studentAttendanceData = [];
 
-  Future<void> getListOfSubjects() async {
-    // setState(() {
-    //   subjects = List<String>.from(unconvertedSubjects
-    //       .map((dynamic subject) => subject['subject_name'].toString()));
-    //   sections = List<String>.from(unconvertedSections
-    //       .map((dynamic section) => section['section_name'].toString()));
-    // });
+  @override
+  void initState() {
+    super.initState();
+    getListOfSubjects();
   }
 
-  // Future<void> getTeacherDetails() async {
+  Future<void> getListOfSubjects() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
 
-  // }
+    String? teacherId = teacherInfo?['teacher_id'];
+    if (teacherId != null && teacherId.isNotEmpty) {
+      final response = await http
+          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          converted = jsonDecode(response.body);
+          print('get list: $converted');
+          setState(() {
+            subjects = List<String>.from(converted
+                .map((dynamic subject) => subject['subject_name'].toString()));
+          });
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("No subjects")));
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
+      }
+    } else {
+      print("Error: Teacher ID is null or empty");
+    }
+  }
+
+  Future<void> getAttendanceList() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    final response = await http.post(Uri.parse(Api.listOfAttendance),
+        body: {'teacher_id': teacherId, 'subject_name': selectedSubject});
+    if (response.statusCode == 200) {
+      try{
+        studentAttendanceData = jsonDecode(response.body);
+      print("Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceData ?? ""}");
+      }catch(error){
+        print("no data lods");
+        studentAttendanceData.clear();
+      }
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,28 +92,18 @@ class _AttendanceReportState extends State<AttendanceReport> {
       body: Column(
         children: [
           DropdownButton(
-            items: subjects.map((String subject) {
-              return DropdownMenuItem(value: subject, child: Text(subject));
+            items: subjects.map((String subjects) {
+              return DropdownMenuItem(value: subjects, child: Text(subjects));
             }).toList(),
             onChanged: (String? newValue) {
               setState(() {
                 selectedSubject = newValue;
               });
-              // getTeacherDetails();
+              if (selectedSubject != null) {
+                getAttendanceList();
+              }
             },
-            hint: Text('Select a subject'),
-          ),
-          DropdownButton(
-            items: sections.map((String sections) {
-              return DropdownMenuItem(value: sections, child: Text(sections));
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedSection = newValue;
-              });
-              // getTeacherDetails();
-            },
-            hint: Text('Select a section'),
+            hint: Text(selectedSubject ?? 'Select a schedule'),
           ),
           const SizedBox(height: 40),
           Expanded(
@@ -72,11 +111,12 @@ class _AttendanceReportState extends State<AttendanceReport> {
               itemCount: studentAttendanceData.length,
               itemBuilder: (context, index) {
                 return AttendanceReportWidget(
-                  first_name: studentAttendanceData[index]['first_name'],
-                  last_name: studentAttendanceData[index]['last_name'],
-                  attendance_status: studentAttendanceData[index]
-                      ['attendance_status'],
-                );
+                    first_name: studentAttendanceData[index]['first_name'] ?? "",
+                    last_name: studentAttendanceData[index]['last_name'] ?? "",
+                    attendance_status: studentAttendanceData[index]
+                        ['attendance_status'],
+                    attendance_time: studentAttendanceData[index]
+                        ['formatted_time']);
               },
             ),
           ),
@@ -90,10 +130,12 @@ class AttendanceReportWidget extends StatelessWidget {
   String first_name;
   String last_name;
   String attendance_status;
+  String attendance_time;
   AttendanceReportWidget(
       {required this.first_name,
       required this.last_name,
-      required this.attendance_status});
+      required this.attendance_status,
+      required this.attendance_time});
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +192,9 @@ class AttendanceReportWidget extends StatelessWidget {
                 ),
               ],
             ),
-            StudentAttendanceStatus(attendance_status: attendance_status),
+            StudentAttendanceStatus(
+                attendance_status: attendance_status,
+                attendance_time: attendance_time),
           ],
         ),
       ),
@@ -160,15 +204,17 @@ class AttendanceReportWidget extends StatelessWidget {
 
 class StudentAttendanceStatus extends StatelessWidget {
   String attendance_status;
-  StudentAttendanceStatus({required this.attendance_status});
+  String attendance_time;
+  StudentAttendanceStatus(
+      {required this.attendance_status, required this.attendance_time});
 
   @override
   Widget build(BuildContext context) {
     if (attendance_status == 'Present') {
-      return const Column(
+      return Column(
         children: [
           //This is the time n of the student
-          Row(
+          const Row(
             children: [
               Icon(
                 Icons.how_to_reg_outlined,
@@ -186,23 +232,23 @@ class StudentAttendanceStatus extends StatelessWidget {
               )
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           //This is the time-in label text
           Row(
             children: [
               Text(
-                '4:00 AM', //temporary
-                style: TextStyle(
+                '$attendance_time AM', //temporary
+                style: const TextStyle(
                     color: Color(0xFF1C2C4B),
                     fontSize: 12,
                     fontWeight: FontWeight.bold),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
-              Text(
+              const Text(
                 'TIME IN',
                 style: TextStyle(
                   color: Color(0xFF1C2C4B),

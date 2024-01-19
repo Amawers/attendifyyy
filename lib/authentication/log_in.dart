@@ -8,6 +8,7 @@ import 'package:attendifyyy/authentication/user_preferences/user_preferences.dar
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:email_validator/email_validator.dart';
 
 class LogIn extends StatefulWidget {
   @override
@@ -18,7 +19,9 @@ class _LogInState extends State<LogIn> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  String _response = '';
+  var _formKey = GlobalKey<FormState>();
+
+  String _response = "";
 
   Future<void> postSignUp() async {
     final response = await http.post(
@@ -62,69 +65,88 @@ class _LogInState extends State<LogIn> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 150,
-              width: 200,
-              fit: BoxFit.contain,
-            ),
-            createTextField(emailController, 'Email'),
-            const SizedBox(height: 20),
-            createTextField(passwordController, 'Password'),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: postSignUp,
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(
-                      const Size.fromHeight(60)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ))),
-              child: const Text('LOG IN',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Don't have an account?",
-                  style: TextStyle(fontSize: 16.0, color: Color(0xFF777777)),
-                ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUp()),
-                      );
-                    },
-                    style: ButtonStyle(
-                      //this padding is the distance between ...account? and Sign up text
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.all(5.0)),
-                    ),
-                    child: const Text('Sign up',
-                        style: TextStyle(
-                            fontSize: 16.0, color: Color(0xFF081631))))
-              ],
-            )
-          ],
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: 150,
+                width: 200,
+                fit: BoxFit.contain,
+              ),
+              createTextField(emailController, 'Email', (value) {
+                if (value == null || value.isEmpty) {
+                  return "This field is required.";
+                } else if (!EmailValidator.validate(value)) {
+                  return "Please use a valid email address.";
+                }
+                return null;
+              }),
+              const SizedBox(height: 20),
+              createTextField(passwordController, 'Password', (value) {
+                if (value == null || value.isEmpty) {
+                  return "This field is required.";
+                }
+                return null;
+              }),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    postSignUp();
+                  }
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(
+                        const Size.fromHeight(60)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color(0xFF081631)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ))),
+                child: const Text('LOG IN',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    )),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Don't have an account?",
+                    style: TextStyle(fontSize: 16.0, color: Color(0xFF777777)),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUp()),
+                        );
+                      },
+                      style: ButtonStyle(
+                        //this padding is the distance between ...account? and Sign up text
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.all(5.0)),
+                      ),
+                      child: const Text('Sign up',
+                          style: TextStyle(
+                              fontSize: 16.0, color: Color(0xFF081631))))
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 
 /*
 *
@@ -132,8 +154,9 @@ class _LogInState extends State<LogIn> {
 *
 *
 * */
-Widget createTextField(valueController, label) {
-  return TextField(
+Widget createTextField(valueController, label, validationFunction) {
+  return TextFormField(
+    validator: validationFunction,
     controller: valueController,
     decoration: InputDecoration(
       labelText: label,
@@ -149,8 +172,13 @@ Widget createTextField(valueController, label) {
       //normal state of textField border
       enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide:
-          BorderSide(color: Color(0xFFABABAB))), // your color
+          borderSide: BorderSide(color: Color(0xFFABABAB))), // your color
+      errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFFF0000))),
+      focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
     ),
   );
 }

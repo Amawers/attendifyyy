@@ -3,6 +3,7 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:email_validator/email_validator.dart';
 
 List<String> gradeLevelList = <String>[
   '1st Year',
@@ -19,9 +20,9 @@ class ListOfStudentsScreen extends StatefulWidget {
   String? subject_id;
   ListOfStudentsScreen(
       {required this.subject_name,
-        required this.subject_code,
-        required this.section_id,
-        required this.subject_id});
+      required this.subject_code,
+      required this.section_id,
+      required this.subject_id});
 
   @override
   State<ListOfStudentsScreen> createState() => _ListOfStudentsScreenState();
@@ -38,7 +39,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
 
   Future<void> getListOfStudents() async {
     Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
+        await RememberUserPreferences.readUserInfo();
 
     String teacherId = teacherInfo?['teacher_id'];
 
@@ -50,7 +51,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
     };
     try {
       final response =
-      await http.get(Uri.parse(Api.listOfStudents), headers: headers);
+          await http.get(Uri.parse(Api.listOfStudents), headers: headers);
 
       if (response.statusCode == 200) {
         setState(() {
@@ -73,7 +74,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context)),
           title:
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text(
               'Student List',
               style: TextStyle(
@@ -95,15 +96,15 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       body: (studentList.isEmpty)
           ? const Center(child: Text('Empty'))
           : ListView.builder(
-          padding: const EdgeInsets.all(14.0),
-          itemCount: studentList.length,
-          itemBuilder: (context, index) {
-            return ListOfStudentsWidget(
-                first_name: studentList[index]['first_name'] ?? 'No fname',
-                last_name: studentList[index]['last_name'] ?? 'No lname',
-                grade_level:
-                studentList[index]['grade_level'] ?? 'No grade level');
-          }),
+              padding: const EdgeInsets.all(14.0),
+              itemCount: studentList.length,
+              itemBuilder: (context, index) {
+                return ListOfStudentsWidget(
+                    first_name: studentList[index]['first_name'] ?? 'No fname',
+                    last_name: studentList[index]['last_name'] ?? 'No lname',
+                    grade_level:
+                        studentList[index]['grade_level'] ?? 'No grade level');
+              }),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF081631),
         onPressed: () {
@@ -132,29 +133,40 @@ class ListOfStudentsWidget extends StatelessWidget {
 
   ListOfStudentsWidget(
       {required this.first_name,
-        required this.last_name,
-        required this.grade_level});
+      required this.last_name,
+      required this.grade_level});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10.0),
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-      decoration: const BoxDecoration(
-        // borderRadius: BorderRadius.circular(10.0),
-        // color: const Color(0xff081631),
-        border: Border(
-            bottom: BorderSide(
-              width: 1,
-            )),
+      decoration: BoxDecoration(
+        color: const Color(0xFF00315D),
+        borderRadius: BorderRadius.circular(14.0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("$first_name $last_name",
-              style: const TextStyle(color: Color(0xff081631), fontSize: 16.0)),
-          Text(grade_level,
-              style: const TextStyle(color: Color(0xFF696969), fontSize: 14.0)),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(first_name,
+                style: const TextStyle(color: Colors.white, fontSize: 18.0)),
+            Text(last_name,
+                style: const TextStyle(color: Colors.white, fontSize: 18.0)),
+          ]),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 6.0, horizontal: 14.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Text(grade_level,
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold)),
+          )
         ],
       ),
     );
@@ -172,19 +184,13 @@ class CreateStudent extends StatefulWidget {
 
 class _CreateStudentState extends State<CreateStudent> {
   TextEditingController referenceNumberController = TextEditingController();
-
   TextEditingController firstNameController = TextEditingController();
-
   TextEditingController middleInitialController = TextEditingController();
-
   TextEditingController lastNameController = TextEditingController();
-
   TextEditingController emailController = TextEditingController();
-
   TextEditingController courseController = TextEditingController();
-
-  //TextEditingController gradeLevelController = TextEditingController();
   String gradeLevelValue = gradeLevelList.first;
+  final _studentFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -224,19 +230,64 @@ class _CreateStudentState extends State<CreateStudent> {
                 fontSize: 16.0,
               )),
           Form(
+              key: _studentFormKey,
               child: Column(children: [
                 const SizedBox(height: 14),
-                createTextField(referenceNumberController, 'Reference Number'),
+                createTextField(referenceNumberController, 'Reference Number',
+                    (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[a-zA-Z]'))) {
+                    return "Must contain only numbers";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
-                createTextField(firstNameController, 'First Name'),
+                createTextField(firstNameController, 'First Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
-                createTextField(middleInitialController, 'Middle Initial'),
+                createTextField(middleInitialController, 'Middle Initial',
+                    (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  } else if (value.length > 1) {
+                    return "Character limit exceeded.";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
-                createTextField(lastNameController, 'Last Name'),
+                createTextField(lastNameController, 'Last Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
-                createTextField(emailController, 'Email'),
+                createTextField(emailController, 'Email', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (!EmailValidator.validate(value)) {
+                    return "Please use a valid email address.";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
-                createTextField(courseController, 'Course'),
+                createTextField(courseController, 'Course', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
                 const SizedBox(height: 14),
                 DropdownButton<String>(
                   isExpanded: true, //set width to 100%
@@ -249,8 +300,8 @@ class _CreateStudentState extends State<CreateStudent> {
                       gradeLevelValue = value!;
                     });
                   },
-                  items:
-                  gradeLevelList.map<DropdownMenuItem<String>>((String value) {
+                  items: gradeLevelList
+                      .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -260,14 +311,19 @@ class _CreateStudentState extends State<CreateStudent> {
                 const SizedBox(height: 20),
                 TextButton(
                     onPressed: () {
-                      createStudent();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
+                      //validate textfields
+                      if (_studentFormKey.currentState!.validate()) {
+                        //create student in the database
+                        createStudent();
+                        Navigator.of(context, rootNavigator: true)
+                            .pop(); //close dialog
+                      }
                       setState(() {});
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(
-                          const Size.fromHeight(55)), //having height will make width 100%
+                          const Size.fromHeight(
+                              55)), //having height will make width 100%
                       padding: MaterialStateProperty.all<EdgeInsets>(
                           const EdgeInsets.symmetric(
                               vertical: 14.0, horizontal: 44.0)),
@@ -276,8 +332,8 @@ class _CreateStudentState extends State<CreateStudent> {
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          )),
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
                     ),
                     child: const Text("Add",
                         style: TextStyle(
@@ -298,8 +354,9 @@ class _CreateStudentState extends State<CreateStudent> {
 *
 *
 * */
-Widget createTextField(valueController, label) {
+Widget createTextField(valueController, label, validationFunction) {
   return TextFormField(
+    validator: validationFunction,
     controller: valueController,
     decoration: InputDecoration(
       contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
@@ -313,6 +370,14 @@ Widget createTextField(valueController, label) {
       enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           borderSide: BorderSide(color: Color(0xFFABABAB))),
+
+      //border style when error
+      errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFFF0000))),
+      focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
     ),
   );
 }
