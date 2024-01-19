@@ -16,10 +16,12 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> {
+  bool obscurePassword = true;
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  var _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   String _response = "";
 
@@ -60,9 +62,6 @@ class _LogInState extends State<LogIn> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(40.0),
         child: Form(
@@ -73,7 +72,7 @@ class _LogInState extends State<LogIn> {
             children: [
               Image.asset(
                 'assets/images/logo.png',
-                height: 150,
+                height: 200,
                 width: 200,
                 fit: BoxFit.contain,
               ),
@@ -86,12 +85,53 @@ class _LogInState extends State<LogIn> {
                 return null;
               }),
               const SizedBox(height: 20),
-              createTextField(passwordController, 'Password', (value) {
-                if (value == null || value.isEmpty) {
-                  return "This field is required.";
-                }
-                return null;
-              }),
+              //Password with obscure sht
+              TextFormField(
+                controller: passwordController,
+                obscureText: obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                  labelStyle: const TextStyle(
+                      color: Color(0xFFABABAB),
+                      fontSize: 14), //affect the size of textfield
+                  floatingLabelStyle: const TextStyle(color: Color(0xFF081631)),
+                  //when textField is focused or selected
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          BorderSide(width: 2, color: Color(0xFF081631))),
+                  //normal state of textField border
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          BorderSide(color: Color(0xFFABABAB))), // your color
+                  errorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide(color: Color(0xFFFF0000))),
+                  focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          BorderSide(width: 2, color: Color(0xFFFF0000))),
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
+                    },
+                    child: Icon(
+                      obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      color: const Color(0xFF081631),
+                    ),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {

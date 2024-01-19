@@ -10,6 +10,8 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  bool obscurePassword = true;
+
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -20,11 +22,6 @@ class _SignUpState extends State<SignUp> {
   String _response = '';
 
   final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   Future<void> postSignUp() async {
     final response = await http.post(
@@ -66,7 +63,7 @@ class _SignUpState extends State<SignUp> {
               children: [
                 Image.asset(
                   'assets/images/logo.png',
-                  height: 130,
+                  height: 200,
                   fit: BoxFit.contain,
                 ),
                 createTextField(firstNameController, 'First Name', (value) {
@@ -96,18 +93,62 @@ class _SignUpState extends State<SignUp> {
                   return null;
                 }),
                 const SizedBox(height: 12),
-                createTextField(passwordController, 'Password', (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  } else if (value.length <= 8) {
-                    return "Password must exceed 8 characters.";
-                  } else if (!value.contains(RegExp(r'[A-Z]'))) {
-                    return "Password must have at least one uppercase letter.";
-                  } else if (!value.contains(RegExp(r'[0-9]'))) {
-                    return "Password must have at least one number.";
-                  }
-                  return null;
-                }),
+                //Password with obscure sht
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                    labelStyle: const TextStyle(
+                        color: Color(0xFFABABAB),
+                        fontSize: 14), //affect the size of textfield
+                    floatingLabelStyle:
+                        const TextStyle(color: Color(0xFF081631)),
+                    //when textField is focused or selected
+                    focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(width: 2, color: Color(0xFF081631))),
+                    //normal state of textField border
+                    enabledBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(color: Color(0xFFABABAB))), // your color
+                    errorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(color: Color(0xFFFF0000))),
+                    focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(width: 2, color: Color(0xFFFF0000))),
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                      child: Icon(
+                        obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: const Color(0xFF081631),
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "This field is required.";
+                    } else if (value.length <= 8) {
+                      return "Password must exceed 8 characters.";
+                    } else if (!value.contains(RegExp(r'[A-Z]'))) {
+                      return "Password must have at least one uppercase letter.";
+                    } else if (!value.contains(RegExp(r'[0-9]'))) {
+                      return "Password must have at least one number.";
+                    }
+                    return null;
+                  },
+                ),
                 const SizedBox(height: 12),
                 createTextField(phoneNumberController, 'Phone Number', (value) {
                   if (value == null || value.isEmpty) {
@@ -209,7 +250,6 @@ Widget createTextField(valueController, label, validationFunction) {
       enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           borderSide: BorderSide(color: Color(0xFFABABAB))), // your color
-
       //border style when error
       errorBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
