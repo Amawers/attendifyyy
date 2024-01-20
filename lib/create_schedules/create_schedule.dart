@@ -5,7 +5,9 @@ import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-List<int> dayOfWeekList = [1, 2, 3, 4, 5, 6, 7];
+// List<int> dayOfWeekList = [1, 2, 3, 4, 5, 6, 7];
+List<String> dayOfWeekList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
 
 class ListOfSchedules extends StatefulWidget {
   const ListOfSchedules({super.key});
@@ -75,6 +77,7 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
           itemBuilder: (context, index) {
             //create card for each class schedule data in converted list
             return ClassScheduleCard(
+              schedule_id: converted[index]['schedule_id'],
               subject_name: converted[index]['subject_name'],
               section_name: converted[index]['section_name'],
               start_time: converted[index]['start_time'],
@@ -110,6 +113,7 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
 *
 * */
 class ClassScheduleCard extends StatelessWidget {
+  String schedule_id;
   String subject_name;
   String section_name;
   String start_time;
@@ -119,12 +123,20 @@ class ClassScheduleCard extends StatelessWidget {
 
   ClassScheduleCard(
       {super.key,
+      required this.schedule_id,
       required this.subject_name,
       required this.section_name,
       required this.start_time,
       required this.end_time,
       required this.day_of_week,
       required this.backgroundColor});
+
+  Future<void> deleteSchedule(String schedule_id) async {
+    final response = await http.delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
+    if (response.statusCode == 200) {
+      print('Na delete? ${jsonDecode(response.body)}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,8 +164,8 @@ class ClassScheduleCard extends StatelessWidget {
           children: [
             //Class sched card header
             Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 3.0, horizontal: 14.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 3.0, horizontal: 14.0),
                 decoration: BoxDecoration(
                     color: Color(backgroundColor),
                     borderRadius: const BorderRadius.vertical(
@@ -194,7 +206,8 @@ class ClassScheduleCard extends StatelessWidget {
                             if (value == 0) {
                               print("Class Schedule update.");
                             } else if (value == 1) {
-                              print("Class Schedule delete.");
+                              // print("Class Schedule delete.");
+                              deleteSchedule(schedule_id);
                             }
                           }),
                     ])),
@@ -274,7 +287,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
   //TextEditingController endTimeController = TextEditingController();
   TimeOfDay startTime = TimeOfDay.now();
   TimeOfDay endTime = TimeOfDay.now();
-  int dayWeekValue = dayOfWeekList.first;
+  // int dayWeekValue = dayOfWeekList.first;
+  String? dayWeekValue;
 
   //post newly created schedule to the database
   Future<void> createSchedule() async {
@@ -283,11 +297,14 @@ class _CreateScheduleState extends State<CreateSchedule> {
 
     String teacherId = teacherInfo?['teacher_id'];
 
+    print("Sulod sa start time: ${startTime}");
+
     final response = await http.post(Uri.parse(Api.createSchedule), body: {
       'teacher_id': teacherId,
       'subject_name': subjectNameController.text,
       'section_name': sectionNameController.text,
-      'start_time': "$startTime", //I wrap it with double quote to convert it into string
+      'start_time':
+          "$startTime.", //I wrap it with double quote to convert it into string
       'end_time': "$endTime",
       'days_of_week': "$dayWeekValue"
     });
@@ -346,7 +363,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 OutlinedButton(
                     style: ButtonStyle(
                         padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 14.0)),
+                            const EdgeInsets.symmetric(
+                                vertical: 20.0, horizontal: 14.0)),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -368,12 +386,13 @@ class _CreateScheduleState extends State<CreateSchedule> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(children: [
-                          const Text(
-                              "Start Time:  ",
+                          const Text("Start Time:  ",
                               style: TextStyle(color: Color(0xFF081631))),
-                          Text(
-                              "${startTime.hour}:${startTime.minute}",
-                              style: const TextStyle(color: Color(0xFF081631), fontSize: 15.0, fontWeight: FontWeight.bold)),
+                          Text("${startTime.hour}:${startTime.minute}",
+                              style: const TextStyle(
+                                  color: Color(0xFF081631),
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold)),
                         ]),
                         const Icon(Icons.schedule, color: Color(0xFF081631))
                       ],
@@ -387,7 +406,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 OutlinedButton(
                     style: ButtonStyle(
                         padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 14.0)),
+                            const EdgeInsets.symmetric(
+                                vertical: 20.0, horizontal: 14.0)),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -409,12 +429,13 @@ class _CreateScheduleState extends State<CreateSchedule> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(children: [
-                          const Text(
-                              "End Time:  ",
+                          const Text("End Time:  ",
                               style: TextStyle(color: Color(0xFF081631))),
-                          Text(
-                              "${endTime.hour}:${endTime.minute}",
-                              style: const TextStyle(color: Color(0xFF081631), fontSize: 15.0, fontWeight: FontWeight.bold)),
+                          Text("${endTime.hour}:${endTime.minute}",
+                              style: const TextStyle(
+                                  color: Color(0xFF081631),
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold)),
                         ]),
                         const Icon(Icons.schedule, color: Color(0xFF081631))
                       ],
@@ -425,7 +446,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 * Dropdown field for day of the week
                 *
                 * */
-                DropdownButtonFormField<int>(
+                DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: "Days in a week",
                     contentPadding: const EdgeInsets.all(16.0),
@@ -440,21 +461,40 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     ),
                   ),
                   isExpanded: true, //set width to 100%
-                  value: dayWeekValue,
+                  // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: (int? value) {
+                 
+                  // items: dayOfWeekList.map<DropdownMenuItem<int>>((int value) {
+                  //   return DropdownMenuItem<int>(
+                  //     value: value,
+                  //     child: Text("$value"),
+                  //   );
+                  // }).toList(),
+                  items: dayOfWeekList.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem(value: value, child: Text("$value"));
+                  }).toList(),
+                   onChanged: (String? value) {
                     // This is called when the user selects an item.
                     setState(() {
                       dayWeekValue = value!;
                     });
                   },
-                  items: dayOfWeekList.map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text("$value"),
-                    );
-                  }).toList(),
                 ),
+
+          //       DropdownButton(
+          //   items: subjects.map((String subjects) {
+          //     return DropdownMenuItem(value: subjects, child: Text(subjects));
+          //   }).toList(),
+          //   onChanged: (String? newValue) {
+          //     setState(() {
+          //       selectedSubject = newValue;
+          //     });
+          //     if (selectedSubject != null) {
+          //       getAttendanceList();
+          //     }
+          //   },
+          //   hint: Text(selectedSubject ?? 'Select a schedule'),
+          // ),
                 const SizedBox(height: 20),
                 /*
                 *
