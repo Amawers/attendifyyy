@@ -2,6 +2,7 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/log_in.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:email_validator/email_validator.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -9,6 +10,8 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  bool obscurePassword = true;
+
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -17,6 +20,8 @@ class _SignUpState extends State<SignUp> {
   TextEditingController departmentController = TextEditingController();
 
   String _response = '';
+
+  final _formKey = GlobalKey<FormState>();
 
   Future<void> postSignUp() async {
     final response = await http.post(
@@ -47,77 +52,178 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(40.0),
-        child: Column(
-          //center signup fields or context vertically
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 130,
-              fit: BoxFit.contain,
-            ),
-            createTextField(firstNameController, "First Name"),
-            const SizedBox(height: 12),
-            createTextField(lastNameController, 'Last Name'),
-            const SizedBox(height: 12),
-            createTextField(emailController, 'Email'),
-            const SizedBox(height: 12),
-            createTextField(passwordController, 'Password'),
-            const SizedBox(height: 12),
-            createTextField(phoneNumberController, 'Phone Number'),
-            const SizedBox(height: 12),
-            createTextField(departmentController, 'Department'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: postSignUp,
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(
-                      const Size.fromHeight(60)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ))),
-              child: const Text('SIGN UP',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ),
-            const SizedBox(height: 2),
-            Row(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              //center signup fields or context vertically
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Already have an account?',
-                  style: TextStyle(fontSize: 16.0, color: Color(0xFF777777)),
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 200,
+                  fit: BoxFit.contain,
                 ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => LogIn()));
-                    },
-                    style: ButtonStyle(
-                      //this padding is the distance between ...account? and Sign in text
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.all(5.0)),
+                createTextField(firstNameController, 'First Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 12),
+                createTextField(lastNameController, 'Last Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 12),
+                createTextField(emailController, 'Email', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (!EmailValidator.validate(value)) {
+                    return "Please use a valid email address.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 12),
+                //Password with obscure sht
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                    labelStyle: const TextStyle(
+                        color: Color(0xFFABABAB),
+                        fontSize: 14), //affect the size of textfield
+                    floatingLabelStyle:
+                        const TextStyle(color: Color(0xFF081631)),
+                    //when textField is focused or selected
+                    focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(width: 2, color: Color(0xFF081631))),
+                    //normal state of textField border
+                    enabledBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(color: Color(0xFFABABAB))), // your color
+                    errorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(color: Color(0xFFFF0000))),
+                    focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                            BorderSide(width: 2, color: Color(0xFFFF0000))),
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                      child: Icon(
+                        obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: const Color(0xFF081631),
+                      ),
                     ),
-                    child: const Text('Sign in',
-                        style: TextStyle(
-                            fontSize: 16.0, color: Color(0xFF081631))))
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "This field is required.";
+                    } else if (value.length <= 8) {
+                      return "Password must exceed 8 characters.";
+                    } else if (!value.contains(RegExp(r'[A-Z]'))) {
+                      return "Password must have at least one uppercase letter.";
+                    } else if (!value.contains(RegExp(r'[0-9]'))) {
+                      return "Password must have at least one number.";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                createTextField(phoneNumberController, 'Phone Number', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.length <= 10) {
+                    return "Please input the correct number.";
+                  } else if (value.contains(RegExp(r'[A-Z, a-z]'))) {
+                    return "Must contain only numbers.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 12),
+                createTextField(departmentController, 'Department', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      postSignUp();
+                    }
+                  },
+                  style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all<Size>(
+                          const Size.fromHeight(60)),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color(0xFF081631)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ))),
+                  child: const Text('SIGN UP',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Already have an account?',
+                      style:
+                          TextStyle(fontSize: 16.0, color: Color(0xFF777777)),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => LogIn()));
+                        },
+                        style: ButtonStyle(
+                          //this padding is the distance between ...account? and Sign in text
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                              const EdgeInsets.all(5.0)),
+                        ),
+                        child: const Text('Sign in',
+                            style: TextStyle(
+                                fontSize: 16.0, color: Color(0xFF081631))))
+                  ],
+                )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
-
 
 /*
 *
@@ -125,8 +231,9 @@ class _SignUpState extends State<SignUp> {
 *
 *
 * */
-Widget createTextField(valueController, label) {
-  return TextField(
+Widget createTextField(valueController, label, validationFunction) {
+  return TextFormField(
+    validator: validationFunction,
     controller: valueController,
     decoration: InputDecoration(
       labelText: label,
@@ -142,8 +249,14 @@ Widget createTextField(valueController, label) {
       //normal state of textField border
       enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide:
-          BorderSide(color: Color(0xFFABABAB))), // your color
+          borderSide: BorderSide(color: Color(0xFFABABAB))), // your color
+      //border style when error
+      errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFFF0000))),
+      focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
     ),
   );
 }

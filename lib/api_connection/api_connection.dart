@@ -1,6 +1,6 @@
 class Api {
-  // static const ip = '192.168.1.11';
-  static const ip = 'localhost';
+  static const ip = '192.168.1.11';
+  // static const ip = 'localhost';
   static const hostConnect = 'http://$ip/attendifyyy_backend';
   static const signUp = '$hostConnect/authentication/sign_up.php';
   static const logIn = '$hostConnect/authentication/log_in.php';
@@ -12,4 +12,5 @@ class Api {
   static const createSchedule = '$hostConnect/create_schedule/create_schedule.php';
   static const listOfAttendance = '$hostConnect/attendance/attendance_list.php';
   static const createAttendance = '$hostConnect/attendance/create_attendance.php';
+  static const getTeacherData = '$hostConnect/utils/teacher_data.php';
 }

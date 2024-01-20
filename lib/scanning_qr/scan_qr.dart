@@ -30,30 +30,31 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     String? teacherId;
     try {
       Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-        
+          await RememberUserPreferences.readUserInfo();
+
       teacherId = teacherInfo?['teacher_id'];
-    } catch (error){
+    } catch (error) {
       print("Error lods: $error");
     }
 
-    final response = await http.get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          converted = jsonDecode(response.body);
-          print("list of schedules if nakuha ba: ${converted}");
-          setState(() {
-            schedules = List<String>.from(converted
-                .map((dynamic subject) => subject['schedule_id'].toString()));
-          });
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No schedules")));
-        }
+    final response = await http
+        .get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        converted = jsonDecode(response.body);
+        print("list of schedules if nakuha ba: ${converted}");
+        setState(() {
+          schedules = List<String>.from(converted
+              .map((dynamic subject) => subject['schedule_id'].toString()));
+        });
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+            .showSnackBar(SnackBar(content: Text("No schedules")));
       }
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+    }
   }
 
   Future<void> processResult(String? result) async {
@@ -72,11 +73,15 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         print(
             'ID: $id\nFirst Name: $firstName\nMiddle Initial: ${middleInitial ?? ''}\nLast Name: $lastName\nCourse: $course');
 
-        final response = await http.post(Uri.parse(Api.createAttendance),
-            body: {
-              'schedule_id': selectedSchedule,
-              'reference_number': id
-        });
+        try {
+          final response = await http.post(Uri.parse(Api.createAttendance),
+              body: {'schedule_id': selectedSchedule, 'reference_number': id});
+          if (response.statusCode == 200) {
+            print(jsonDecode(response.body));
+          }
+        } catch (error) {
+          print("Wala na process ang attendance");
+        }
       } else {
         print('Not valid.');
       }
