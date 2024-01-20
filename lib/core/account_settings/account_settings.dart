@@ -23,6 +23,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   TextEditingController departmentController = TextEditingController();
 
   List<dynamic> teacherData = [];
+  String? imagePath;
 
   @override
   void initState() {
@@ -54,6 +55,50 @@ class _AccountSettingsState extends State<AccountSettings> {
     departmentController.text = teacherData[0]['department'];
   }
 
+  Future<void> retrieveImage() async {
+    String? teacherId;
+    try {
+      // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error loading user info: $error");
+    }
+
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.retrieveImage}?teacher_id=$teacherId'));
+
+      // Check if the response status code is OK (200)
+      if (response.statusCode == 200) {
+        // Decode the JSON response body
+        Map<String, dynamic> responseBody = json.decode(response.body);
+
+        // Check the 'status' field in the response
+        if (responseBody['status'] == 1) {
+          // Assuming the image path is stored in the 'image_path' field
+          imagePath = responseBody['image_path'];
+
+          // Do something with the imagePath, e.g., display the image
+          print("Image Path: $imagePath");
+        } else {
+          // Handle the case where the status is not 1
+          print("Failed to retrieve image path: ${responseBody['status']}");
+        }
+      } else {
+        // Handle non-OK status codes
+        print("Failed to retrieve image. Status code: ${response.statusCode}");
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print("Error during image retrieval: $error");
+    }
+    setState(() {
+      
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,13 +125,16 @@ class _AccountSettingsState extends State<AccountSettings> {
                     Container(
                       width: 110.0,
                       height: 110.0,
-                      child: const ClipOval(
+                      child: ClipOval(
                         child: CircleAvatar(
-                          radius: 60.0,
-                          backgroundColor: Colors.grey,
-                          // backgroundImage:
-                          //     NetworkImage('https://picsum.photos/250?image=9'),
-                        ),
+                            radius: 60.0,
+                            backgroundColor: Colors.grey,
+                            backgroundImage: imagePath != null
+                                ? Image.network(
+                                        'http://192.168.1.11/attendifyyy_backend/$imagePath')
+                                    .image
+                                : Image.asset('assets/images/logo.png')
+                                    .image),
                       ),
                     ),
                     Positioned(
@@ -169,7 +217,9 @@ class _AccountSettingsState extends State<AccountSettings> {
                     const SizedBox(height: 40),
 
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        retrieveImage();
+                      },
                       style: ButtonStyle(
                         minimumSize: MaterialStateProperty.all<Size>(
                             const Size.fromHeight(60)),

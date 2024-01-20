@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ImageUpload extends StatelessWidget {
-  
   late File _image;
 
-  Future<void> _chooseImageFromCamera() async{
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
-    if(pickedFile != null){
+  Future<void> _chooseImageFromCamera() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
       _image = File(pickedFile.path);
       var isUploaded = await _uploadImage("16", _image);
-      if(isUploaded){
+      if (isUploaded) {
         print('uploaded');
-      }else{
+      } else {
         print('wala naupload');
       }
       print("Image selected!");
@@ -25,21 +25,17 @@ class ImageUpload extends StatelessWidget {
 
   Future<bool> _uploadImage(String user_id, File user_image) async {
     final bytes = user_image.readAsBytesSync();
-    
-    final data = {
-     'teacher_id': user_id,
-     'teacher_image': base64Encode(bytes)
-    };
 
-    final response = await http.post(Uri.parse(Api.uploadImage), 
-      body: jsonEncode(data)
-    );
+    final data = {'teacher_id': user_id, 'teacher_image': base64Encode(bytes)};
+
+    final response =
+        await http.post(Uri.parse(Api.uploadImage), body: jsonEncode(data));
 
     final message = jsonDecode(response.body);
-    
-    if(message['status'] == 1){
+
+    if (message['status'] == 1) {
       return true;
-    }else{
+    } else {
       return false;
     }
   }
@@ -48,7 +44,8 @@ class ImageUpload extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        ElevatedButton(onPressed: _chooseImageFromCamera, child: const Text("Camera")),
+        ElevatedButton(
+            onPressed: _chooseImageFromCamera, child: const Text("Camera")),
         ElevatedButton(onPressed: () {}, child: const Text("Choose Image")),
       ]),
     );
