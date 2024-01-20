@@ -153,7 +153,7 @@ class ClassScheduleCard extends StatelessWidget {
             //Class sched card header
             Container(
                 padding: const EdgeInsets.symmetric(
-                    vertical: 10.0, horizontal: 14.0),
+                    vertical: 3.0, horizontal: 14.0),
                 decoration: BoxDecoration(
                     color: Color(backgroundColor),
                     borderRadius: const BorderRadius.vertical(
@@ -175,7 +175,7 @@ class ClassScheduleCard extends StatelessWidget {
                               const PopupMenuItem<int>(
                                 value: 0,
                                 child: Row(children: [
-                                  Icon(Icons.delete_forever, size: 18.0),
+                                  Icon(Icons.edit, size: 18.0),
                                   SizedBox(width: 5.0),
                                   Text("Edit")
                                 ]),
@@ -183,7 +183,7 @@ class ClassScheduleCard extends StatelessWidget {
                               const PopupMenuItem<int>(
                                 value: 1,
                                 child: Row(children: [
-                                  Icon(Icons.edit, size: 18.0),
+                                  Icon(Icons.delete_forever, size: 18.0),
                                   SizedBox(width: 5.0),
                                   Text("Delete")
                                 ]),
@@ -346,7 +346,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 OutlinedButton(
                     style: ButtonStyle(
                         padding: MaterialStateProperty.all(
-                            const EdgeInsets.all(20.0)),
+                            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 14.0)),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -367,10 +367,15 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                            "Start Time: ${startTime.hour}:${startTime.minute}",
-                            style: const TextStyle(color: Color(0xFFABABAB))),
-                        const Icon(Icons.schedule, color: Color(0xFFABABAB))
+                        Row(children: [
+                          const Text(
+                              "Start Time:  ",
+                              style: TextStyle(color: Color(0xFF081631))),
+                          Text(
+                              "${startTime.hour}:${startTime.minute}",
+                              style: const TextStyle(color: Color(0xFF081631), fontSize: 15.0, fontWeight: FontWeight.bold)),
+                        ]),
+                        const Icon(Icons.schedule, color: Color(0xFF081631))
                       ],
                     )),
                 const SizedBox(height: 20),
@@ -382,7 +387,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 OutlinedButton(
                     style: ButtonStyle(
                         padding: MaterialStateProperty.all(
-                            const EdgeInsets.all(20.0)),
+                            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 14.0)),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -403,10 +408,15 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Start Time: ${endTime.hour}:${endTime.minute}",
-                            style: const TextStyle(color: Color(0xFFABABAB))),
-
-                        const Icon(Icons.schedule, color: Color(0xFFABABAB))
+                        Row(children: [
+                          const Text(
+                              "End Time:  ",
+                              style: TextStyle(color: Color(0xFF081631))),
+                          Text(
+                              "${endTime.hour}:${endTime.minute}",
+                              style: const TextStyle(color: Color(0xFF081631), fontSize: 15.0, fontWeight: FontWeight.bold)),
+                        ]),
+                        const Icon(Icons.schedule, color: Color(0xFF081631))
                       ],
                     )),
                 const SizedBox(height: 20),
@@ -509,7 +519,7 @@ Widget createTextFormField(label, valueController, validationCondition) {
         //normal state of textField border
         enabledBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(color: Color(0xFFABABAB))),
+            borderSide: BorderSide(color: Color(0x8B081631))),
         //border style when error
         errorBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
