@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,22 @@ class ImageUpload extends StatelessWidget {
   late File _image;
 
   Future<void> _chooseImageFromCamera() async {
+    
+
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
+      String? teacherId;
+    try {
+      // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error loading user info: $error");
+    }
       _image = File(pickedFile.path);
-      var isUploaded = await _uploadImage("16", _image);
+      var isUploaded = await _uploadImage(teacherId!, _image);
       if (isUploaded) {
         print('uploaded');
       } else {

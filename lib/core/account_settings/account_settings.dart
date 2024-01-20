@@ -29,6 +29,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   void initState() {
     super.initState();
     getTeacherData();
+    retrieveImage();
   }
 
   Future<void> getTeacherData() async {
