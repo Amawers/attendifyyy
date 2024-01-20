@@ -13,4 +13,6 @@ class Api {
   static const listOfAttendance = '$hostConnect/attendance/attendance_list.php';
   static const createAttendance = '$hostConnect/attendance/create_attendance.php';
   static const getTeacherData = '$hostConnect/utils/teacher_data.php';
+  static const uploadImage = '$hostConnect/upload_image.php';
+  static const retrieveImage = '$hostConnect/retrieve_image.php';
 }
