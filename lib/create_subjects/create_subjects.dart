@@ -204,8 +204,6 @@ class _CreateSubject extends State<CreateSubject> {
       'section_name': sectionNameController.text,
       'semester': semesterValue
     });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${response.body}')));
   }
 
   @override
