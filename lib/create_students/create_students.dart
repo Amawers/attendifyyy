@@ -30,6 +30,7 @@ class ListOfStudentsScreen extends StatefulWidget {
 
 class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
   List<dynamic> studentList = [];
+  bool editSubs = false; //variable paras edit subject
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       print("kani nag eror $error");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,10 +131,17 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                   ),
                   child: IconButton(
                     onPressed: () {
-                      
+                      setState(() {
+                        editSubs == false
+                            ? editSubs = true
+                            : editSubs =
+                                false; //ternary para sa state sa edit icon
+                      });
                     },
-                    icon: const Icon(
-                      Icons.edit,
+                    icon: Icon(
+                      editSubs
+                          ? Icons.clear
+                          : Icons.edit, //ternary para mailisan ang icon sa edit
                       color: Colors.white, // set ang color sa icon
                     ),
                   ),
@@ -148,13 +157,58 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                     itemCount: studentList.length,
                     itemBuilder: (context, index) {
                       return ListOfStudentsWidget(
-                        first_name:
-                            studentList[index]['first_name'] ?? 'No fname',
-                        last_name:
-                            studentList[index]['last_name'] ?? 'No lname',
-                        grade_level: studentList[index]['grade_level'] ??
-                            'No grade level',
-                      );
+                          first_name:
+                              studentList[index]['first_name'] ?? 'No fname',
+                          last_name:
+                              studentList[index]['last_name'] ?? 'No lname',
+                          editBackground: editSubs
+                              ? Colors.transparent
+                              : Colors.white, //add argument para sa bg color
+                          grade_level: editSubs //add widget argument
+                              ? Row(
+                                  children: [
+                                    Container(
+                                        height: 30,
+                                        width: 30,
+                                        child: InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext
+                                                          context) =>
+                                                      const Dialog(
+                                                          child:
+                                                              DeleteStudent()));
+                                            },
+                                            child: const Icon(Icons.delete_forever,
+                                                color: Colors.white))),
+                                    const SizedBox(width: 10),
+                                    Container(
+                                        height: 30,
+                                        width: 30,
+                                        child: InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext
+                                                          context) =>
+                                                      Dialog(
+                                                          child: EditStudent(
+                                                        subject_id: '',
+                                                        section_id: '',
+                                                      )));
+                                            },
+                                            child: const Icon(Icons.edit,
+                                                color: Colors.white)))
+                                  ],
+                                )
+                              : Text(
+                                  studentList[index]['grade_level'] ??
+                                      'No grade level',
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold)));
                     },
                   ),
           ),
@@ -184,18 +238,21 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
 class ListOfStudentsWidget extends StatelessWidget {
   String first_name;
   String last_name;
-  String grade_level;
+  Widget grade_level; //change string to widget
+  Color editBackground; //add parameter for bg color
 
   ListOfStudentsWidget(
       {required this.first_name,
       required this.last_name,
-      required this.grade_level});
+      required this.grade_level,
+      required this.editBackground});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 80,
       margin: const EdgeInsets.only(bottom: 10.0),
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
       decoration: BoxDecoration(
         color: const Color(0xFF081631),
         borderRadius: BorderRadius.circular(14.0),
@@ -213,14 +270,10 @@ class ListOfStudentsWidget extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 6.0, horizontal: 14.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: editBackground,
               borderRadius: BorderRadius.circular(10.0),
             ),
-            child: Text(grade_level,
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold)),
+            child: grade_level,
           )
         ],
       ),
@@ -397,6 +450,255 @@ class _CreateStudentState extends State<CreateStudent> {
                             fontWeight: FontWeight.bold,
                             color: Colors.white)))
               ]))
+        ],
+      ),
+    );
+  }
+}
+
+class EditStudent extends StatefulWidget {
+  String? section_id;
+  String? subject_id;
+  EditStudent({required this.section_id, required this.subject_id});
+
+  @override
+  State<EditStudent> createState() => _EditStudentState();
+}
+
+class _EditStudentState extends State<EditStudent> {
+  TextEditingController referenceNumberController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController middleInitialController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController courseController = TextEditingController();
+  String gradeLevelValue = gradeLevelList.first;
+  final _studentFormKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> editStudent() async {
+    final response = await http.post(Uri.parse(Api.createStudent), body: {
+      'reference_number': referenceNumberController.text,
+      'first_name': firstNameController.text,
+      'middle_initial': middleInitialController.text,
+      'last_name': lastNameController.text,
+      'email': emailController.text,
+      'course': courseController.text,
+      'grade_level': gradeLevelValue,
+      'section_id': widget.section_id,
+      'subject_id': widget.subject_id
+    });
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print("nag error connect sa backend");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 580,
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          const Text('EDIT STUDENT',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              )),
+          Form(
+              key: _studentFormKey,
+              child: Column(children: [
+                const SizedBox(height: 14),
+                createTextField(referenceNumberController, 'Reference Number',
+                    (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[a-zA-Z]'))) {
+                    return "Must contain only numbers";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(firstNameController, 'First Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(middleInitialController, 'Middle Initial',
+                    (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  } else if (value.length > 1) {
+                    return "Character limit exceeded.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(lastNameController, 'Last Name', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.contains(RegExp(r'[0-9]'))) {
+                    return "Must contain only letters";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(emailController, 'Email', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (!EmailValidator.validate(value)) {
+                    return "Please use a valid email address.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(courseController, 'Course', (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                DropdownButton<String>(
+                  isExpanded: true, //set width to 100%
+                  value: gradeLevelValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  elevation: 16,
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      gradeLevelValue = value!;
+                    });
+                  },
+                  items: gradeLevelList
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                    onPressed: () {
+                      //validate textfields
+                      if (_studentFormKey.currentState!.validate()) {
+                        //create student in the database
+                        editStudent();
+                        Navigator.of(context, rootNavigator: true)
+                            .pop(); //close dialog
+                      }
+                      setState(() {});
+                    },
+                    style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all<Size>(
+                          const Size.fromHeight(
+                              55)), //having height will make width 100%
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(
+                              vertical: 14.0, horizontal: 44.0)),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color(0xFF081631),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
+                    ),
+                    child: const Text("Edit",
+                        style: TextStyle(
+                            backgroundColor: Color(0xFF081631),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)))
+              ]))
+        ],
+      ),
+    );
+  }
+}
+
+//FUNCTION OR METHOD PARAS DELETE MENU SA STUDENT
+class DeleteStudent extends StatefulWidget {
+  const DeleteStudent({super.key});
+
+  @override
+  State<DeleteStudent> createState() => _DeleteStudentState();
+}
+
+class _DeleteStudentState extends State<DeleteStudent> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: Colors.white,
+      ),
+      height: 100,
+      width: 70,
+      margin: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Text(
+            "Are you sure?",
+            style: TextStyle(
+                color: Color(0xFF081631),
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.check,
+                ),
+                label: const Text(
+                  'YES',
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Color(0xFF081631), // Background color of the button
+                  onPrimary: Colors.white, // Text color on the button
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(10), // Set border radius
+                  ),
+                  elevation: 4.0, // Set elevation
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.cancel),
+                label: const Text(
+                  'NO',
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Color(0xFF081631), // Background color of the button
+                  onPrimary: Colors.white, // Text color on the button
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(10), // Set border radius
+                  ),
+                  elevation: 4.0, // Set elevation
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );
