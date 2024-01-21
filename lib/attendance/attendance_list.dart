@@ -1,12 +1,19 @@
 import 'dart:convert';
-
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart'; //to use DateFormat for date
+
+//filter options
+List<String> filterOptions = ['All', 'Present', 'Late', 'Absent'];
+//Date
+String currentDate = DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
 
 class AttendanceReport extends StatefulWidget {
+  const AttendanceReport({super.key});
+
   @override
   State<AttendanceReport> createState() => _AttendanceReportState();
 }
@@ -15,8 +22,12 @@ class _AttendanceReportState extends State<AttendanceReport> {
   List<dynamic> converted = [];
   List<String> subjects = [];
   String? selectedSubject;
-
-  List<dynamic> studentAttendanceData = [];
+  //this is where the first or the original fetched studentAttendanceData will be stored
+  List<dynamic> studentAttendanceDataOriginal = [];
+  //this is the studentAttendanceData that going to be use for making student cards
+  //this is also the list that will be filtered when selecting a filter option
+  List<dynamic> studentAttendanceData =
+      []; //by default its value is the studentAttendanceDAtaOriginal
 
   @override
   void initState() {
@@ -24,6 +35,7 @@ class _AttendanceReportState extends State<AttendanceReport> {
     getListOfSubjects();
   }
 
+  //fetching data from database
   Future<void> getListOfSubjects() async {
     Map<String, dynamic>? teacherInfo =
         await RememberUserPreferences.readUserInfo();
@@ -37,8 +49,14 @@ class _AttendanceReportState extends State<AttendanceReport> {
           converted = jsonDecode(response.body);
           print('get list: $converted');
           setState(() {
+            //get all string subjects as a list from converted
             subjects = List<String>.from(converted
                 .map((dynamic subject) => subject['subject_name'].toString()));
+            //set selectedSubject with the first subject in subjects if it exist
+            selectedSubject = subjects.first;
+            if (selectedSubject != null) {
+              getAttendanceList();
+            }
           });
         } else {
           ScaffoldMessenger.of(context)
@@ -53,6 +71,7 @@ class _AttendanceReportState extends State<AttendanceReport> {
     }
   }
 
+  //use for fetching all attendance list of the selected subject
   Future<void> getAttendanceList() async {
     Map<String, dynamic>? teacherInfo =
         await RememberUserPreferences.readUserInfo();
@@ -62,12 +81,15 @@ class _AttendanceReportState extends State<AttendanceReport> {
     final response = await http.post(Uri.parse(Api.listOfAttendance),
         body: {'teacher_id': teacherId, 'subject_name': selectedSubject});
     if (response.statusCode == 200) {
-      try{
-        studentAttendanceData = jsonDecode(response.body);
-      print("Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceData ?? ""}");
-      }catch(error){
+      try {
+        studentAttendanceDataOriginal = jsonDecode(response.body);
+        studentAttendanceData =
+            studentAttendanceDataOriginal; //set the default value of studentAttendanceData
+        print(
+            "Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceDataOriginal ?? ""}");
+      } catch (error) {
         print("no data lods");
-        studentAttendanceData.clear();
+        studentAttendanceDataOriginal.clear();
       }
     } else {
       ScaffoldMessenger.of(context)
@@ -76,62 +98,246 @@ class _AttendanceReportState extends State<AttendanceReport> {
     setState(() {});
   }
 
+  //variable that holds the current selected filter
+  String? selectedFilter = filterOptions.first;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Attendance Report'),
+          title: const Text('Attendance Report'),
           leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => BottomNavBar()),
+                  MaterialPageRoute(builder: (context) => const BottomNavBar()),
                 );
               })),
-      body: Column(
-        children: [
-          DropdownButton(
-            items: subjects.map((String subjects) {
-              return DropdownMenuItem(value: subjects, child: Text(subjects));
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedSubject = newValue;
-              });
-              if (selectedSubject != null) {
-                getAttendanceList();
-              }
-            },
-            hint: Text(selectedSubject ?? 'Select a schedule'),
-          ),
-          const SizedBox(height: 40),
-          Expanded(
-            child: ListView.builder(
-              itemCount: studentAttendanceData.length,
-              itemBuilder: (context, index) {
-                return AttendanceReportWidget(
-                    first_name: studentAttendanceData[index]['first_name'] ?? "",
-                    last_name: studentAttendanceData[index]['last_name'] ?? "",
-                    attendance_status: studentAttendanceData[index]
-                        ['attendance_status'],
-                    attendance_time: studentAttendanceData[index]
-                        ['formatted_time']);
-              },
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 80.0),
+        child: Column(
+          children: [
+            /*
+             *
+             * Headings
+             * Subject dropdown with date and filter option
+             *
+             *  */
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                /*
+                * Subject dropdown and date
+                * */
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //subject dropdown
+                    DropdownButton(
+                        underline:
+                            const SizedBox(), //make the dropdownbutton underline invisible
+                        focusColor: Colors.transparent,
+                        items: subjects.map((String subjects) {
+                          return DropdownMenuItem(
+                              value: subjects, child: Text(subjects));
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedSubject = newValue;
+                          });
+                          if (selectedSubject != null) {
+                            getAttendanceList();
+                          }
+                        },
+                        //hide default arrow_downward icon
+                        icon: const Visibility(
+                            visible: false, child: Icon(Icons.arrow_downward)),
+                        //hint or placeholder of the dropdownbutton
+                        hint: Row(
+                          children: [
+                            Text(selectedSubject ?? 'Select a schedule',
+                                style: const TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF081631))),
+                            const Icon(Icons.arrow_drop_down)
+                          ],
+                        )),
+                    //current date
+                    Text(currentDate,
+                        style: const TextStyle(color: Color(0xFF081631))),
+                  ],
+                ),
+                /*
+                *
+                * Filter option
+                *
+                * */
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    /*
+                      *
+                      * this is the bottom sheet that will popup when filter icon is clicked
+                      *
+                      * */
+                    showModalBottomSheet<void>(
+                      //remove constraints in height to customized the minHeight
+                      constraints: const BoxConstraints(
+                        minHeight: 260.0,
+                      ),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SizedBox(
+                          height: 200,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                /*
+                                  *
+                                  * heading title
+                                  *
+                                  * */
+                                const Center(
+                                    child: Text("Filter",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0,
+                                        ))),
+                                const SizedBox(height: 10.0),
+                                /*
+                                  *
+                                  * radio button list
+                                  *
+                                  * */
+                                RadioListTile<String>(
+                                  title: Text(filterOptions[0]),
+                                  value: filterOptions[0],
+                                  groupValue: selectedFilter,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedFilter =
+                                          value; //set the current selectedradio button
+                                      Navigator.pop(
+                                          context); //close bottomsheet
+                                      studentAttendanceData =
+                                          studentAttendanceDataOriginal; //filter the studentAttendanceDate
+                                    });
+                                  },
+                                ),
+                                RadioListTile<String>(
+                                  title: Text(filterOptions[1]),
+                                  value: filterOptions[1],
+                                  groupValue: selectedFilter,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedFilter = value;
+                                      Navigator.pop(
+                                          context); //close bottomsheet
+                                      print(studentAttendanceDataOriginal[0]
+                                          ['attendance_status']);
+                                      studentAttendanceData =
+                                          studentAttendanceDataOriginal
+                                              .where((student) =>
+                                                  student[
+                                                      'attendance_status'] ==
+                                                  "Present")
+                                              .toList(); //filter the studentAttendanceDate
+                                    });
+                                  },
+                                ),
+                                RadioListTile<String>(
+                                  title: Text(filterOptions[2]),
+                                  value: filterOptions[2],
+                                  groupValue: selectedFilter,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedFilter = value;
+                                      Navigator.pop(
+                                          context); //close bottomsheet
+                                      studentAttendanceData =
+                                          studentAttendanceDataOriginal
+                                              .where((student) =>
+                                                  student[
+                                                      'attendance_status'] ==
+                                                  "Late")
+                                              .toList(); //filter the studentAttendanceDate
+                                    });
+                                  },
+                                ),
+                                RadioListTile<String>(
+                                  title: Text(filterOptions[3]),
+                                  value: filterOptions[3],
+                                  groupValue: selectedFilter,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedFilter = value;
+                                      Navigator.pop(
+                                          context); //close bottomsheet
+                                      studentAttendanceData =
+                                          studentAttendanceDataOriginal
+                                              .where((student) =>
+                                                  student[
+                                                      'attendance_status'] ==
+                                                  "Absent")
+                                              .toList(); //filter the studentAttendanceDate
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 40),
+            /*
+            *
+            * list of student attendance cards
+            *
+            * */
+            Expanded(
+              child: ListView.builder(
+                itemCount: studentAttendanceData.length,
+                itemBuilder: (context, index) {
+                  return studentAttendanceCard(
+                      first_name:
+                          studentAttendanceData[index]['first_name'] ?? "",
+                      last_name:
+                          studentAttendanceData[index]['last_name'] ?? "",
+                      attendance_status: studentAttendanceData[index]
+                          ['attendance_status'],
+                      attendance_time: studentAttendanceData[index]
+                          ['formatted_time']);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class AttendanceReportWidget extends StatelessWidget {
+/*
+ *
+ * Use to create studentAttendance card based on the fetched data
+ *
+ *  */
+class studentAttendanceCard extends StatelessWidget {
   String first_name;
   String last_name;
   String attendance_status;
   String attendance_time;
-  AttendanceReportWidget(
+  studentAttendanceCard(
       {required this.first_name,
       required this.last_name,
       required this.attendance_status,
@@ -140,6 +346,8 @@ class AttendanceReportWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(
+          bottom: 20.0), //served as space with its adjacent card
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: const Color(0xFFFFFFFF),
@@ -153,10 +361,17 @@ class AttendanceReportWidget extends StatelessWidget {
         ],
       ),
       child: Padding(
+        //card content padding
         padding: const EdgeInsets.fromLTRB(16, 10, 22, 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
+            /*
+            *
+            * Left side of the card content
+            * Student profile and name
+            *
+            * */
             Row(
               children: [
                 Container(
@@ -192,6 +407,12 @@ class AttendanceReportWidget extends StatelessWidget {
                 ),
               ],
             ),
+            /*
+            *
+            * Right side of the card content
+            * Student attendance status
+            *
+            * */
             StudentAttendanceStatus(
                 attendance_status: attendance_status,
                 attendance_time: attendance_time),
@@ -202,6 +423,11 @@ class AttendanceReportWidget extends StatelessWidget {
   }
 }
 
+/*
+*
+* Use to create student attendance status content
+*
+* */
 class StudentAttendanceStatus extends StatelessWidget {
   String attendance_status;
   String attendance_time;
@@ -227,6 +453,56 @@ class StudentAttendanceStatus extends StatelessWidget {
                 'PRESENT',
                 style: TextStyle(
                     color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          //This is the time-in label text
+          Row(
+            children: [
+              Text(
+                '$attendance_time AM', //temporary
+                style: const TextStyle(
+                    color: Color(0xFF1C2C4B),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              const Text(
+                'TIME IN',
+                style: TextStyle(
+                  color: Color(0xFF1C2C4B),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    } else if (attendance_status == 'Late') {
+      return Column(
+        children: [
+          //This is the time n of the student
+          const Row(
+            children: [
+              Icon(
+                Icons.timer_off,
+                color: Colors.orange,
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Text(
+                'LATE',
+                style: TextStyle(
+                    color: Colors.orange,
                     fontSize: 16,
                     fontWeight: FontWeight.w900),
               )
