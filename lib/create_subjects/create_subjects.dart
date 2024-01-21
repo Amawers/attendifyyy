@@ -57,14 +57,15 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
       0xFF00315D,
       0xFFA4C9FE,
     ];
-
     return Scaffold(
       appBar: AppBar(
+        title: const Text("About App", style: TextStyle(color:  Color(0xFF081631) )), 
         leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const BottomNavBar()))),
-        title: const Text('Subject List'),
+                MaterialPageRoute(builder: (context) => const BottomNavBar()))
+            ),
+        backgroundColor: Colors.white,
       ),
       body: (converted.isEmpty)
           ? const Center(child: Text('Empty'))

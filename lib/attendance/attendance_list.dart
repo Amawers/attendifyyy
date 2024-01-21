@@ -62,10 +62,11 @@ class _AttendanceReportState extends State<AttendanceReport> {
     final response = await http.post(Uri.parse(Api.listOfAttendance),
         body: {'teacher_id': teacherId, 'subject_name': selectedSubject});
     if (response.statusCode == 200) {
-      try{
+      try {
         studentAttendanceData = jsonDecode(response.body);
-      print("Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceData ?? ""}");
-      }catch(error){
+        print(
+            "Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceData ?? ""}");
+      } catch (error) {
         print("no data lods");
         studentAttendanceData.clear();
       }
@@ -80,15 +81,14 @@ class _AttendanceReportState extends State<AttendanceReport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Attendance Report'),
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => BottomNavBar()),
-                );
-              })),
+        title: const Text("Attendance Report",
+            style: TextStyle(color: Color(0xFF081631))),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const BottomNavBar()))),
+        backgroundColor: Colors.white,
+      ),
       body: Column(
         children: [
           DropdownButton(
@@ -111,7 +111,8 @@ class _AttendanceReportState extends State<AttendanceReport> {
               itemCount: studentAttendanceData.length,
               itemBuilder: (context, index) {
                 return AttendanceReportWidget(
-                    first_name: studentAttendanceData[index]['first_name'] ?? "",
+                    first_name:
+                        studentAttendanceData[index]['first_name'] ?? "",
                     last_name: studentAttendanceData[index]['last_name'] ?? "",
                     attendance_status: studentAttendanceData[index]
                         ['attendance_status'],
