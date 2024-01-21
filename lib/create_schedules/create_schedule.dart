@@ -5,9 +5,15 @@ import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-// List<int> dayOfWeekList = [1, 2, 3, 4, 5, 6, 7];
-List<String> dayOfWeekList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
+List<String> dayOfWeekList = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
 
 class ListOfSchedules extends StatefulWidget {
   const ListOfSchedules({super.key});
@@ -132,7 +138,8 @@ class ClassScheduleCard extends StatelessWidget {
       required this.backgroundColor});
 
   Future<void> deleteSchedule(String schedule_id) async {
-    final response = await http.delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
+    final response = await http
+        .delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
     if (response.statusCode == 200) {
       print('Na delete? ${jsonDecode(response.body)}');
     }
@@ -173,12 +180,15 @@ class ClassScheduleCard extends StatelessWidget {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(subject_name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          )),
+                      Flexible(
+                        child: Text(subject_name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                            )),
+                      ),
                       PopupMenuButton(
                           icon:
                               const Icon(Icons.more_vert, color: Colors.white),
@@ -281,13 +291,10 @@ class CreateSchedule extends StatefulWidget {
 
 class _CreateScheduleState extends State<CreateSchedule> {
   final _subjectFormKey = GlobalKey<FormState>();
-  TextEditingController subjectNameController = TextEditingController();
-  TextEditingController sectionNameController = TextEditingController();
-  //TextEditingController startTimeController = TextEditingController();
-  //TextEditingController endTimeController = TextEditingController();
+  String? subjectNameValue;
+  String? sectionNameValue;
   TimeOfDay startTime = TimeOfDay.now();
   TimeOfDay endTime = TimeOfDay.now();
-  // int dayWeekValue = dayOfWeekList.first;
   String? dayWeekValue;
 
   //post newly created schedule to the database
@@ -301,12 +308,12 @@ class _CreateScheduleState extends State<CreateSchedule> {
 
     final response = await http.post(Uri.parse(Api.createSchedule), body: {
       'teacher_id': teacherId,
-      'subject_name': subjectNameController.text,
-      'section_name': sectionNameController.text,
+      'subject_name': subjectNameValue,
+      'section_name': sectionNameValue,
       'start_time':
           "$startTime.", //I wrap it with double quote to convert it into string
       'end_time': "$endTime",
-      'days_of_week': "$dayWeekValue"
+      'days_of_week': dayWeekValue
     });
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('${response.body}')));
@@ -332,28 +339,85 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 const SizedBox(height: 20),
                 /*
                 *
-                * Input Text field for subject name
+                * Dropdown for subject name
                 *
                 * */
-                createTextFormField("Subject Name", subjectNameController,
-                    (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  }
-                  return null;
-                }),
+                DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "This field is required.";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Subject",
+                    contentPadding: const EdgeInsets.all(16.0),
+                    //border style when its focus
+                    focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                        BorderSide(width: 2, color: Color(0xFF081631))),
+                    //border radius
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  isExpanded: true, //set width to 100%
+                  // value: dayWeekValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  items: ['Mobile Programming', 'IAS']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem(
+                        value: value, child: Text("$value"));
+                  }).toList(),
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      subjectNameValue = value!;
+                    });
+                  },
+                ),
                 const SizedBox(height: 20),
                 /*
                 *
-                * Input Text field for section
+                * Dropdown for section
                 *
                 * */
-                createTextFormField("Section", sectionNameController, (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  }
-                  return null;
-                }),
+                DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "This field is required.";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Section",
+                    contentPadding: const EdgeInsets.all(16.0),
+                    //border style when its focus
+                    focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide:
+                        BorderSide(width: 2, color: Color(0xFF081631))),
+                    //border radius
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  isExpanded: true, //set width to 100%
+                  // value: dayWeekValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  items: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem(
+                        value: value, child: Text("$value"));
+                  }).toList(),
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      sectionNameValue = value!;
+                    });
+                  },
+                ),
                 const SizedBox(height: 20),
                 /*
                 *
@@ -463,38 +527,18 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   isExpanded: true, //set width to 100%
                   // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
-                 
-                  // items: dayOfWeekList.map<DropdownMenuItem<int>>((int value) {
-                  //   return DropdownMenuItem<int>(
-                  //     value: value,
-                  //     child: Text("$value"),
-                  //   );
-                  // }).toList(),
-                  items: dayOfWeekList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem(value: value, child: Text("$value"));
+                  items: dayOfWeekList
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem(
+                        value: value, child: Text("$value"));
                   }).toList(),
-                   onChanged: (String? value) {
+                  onChanged: (String? value) {
                     // This is called when the user selects an item.
                     setState(() {
                       dayWeekValue = value!;
                     });
                   },
                 ),
-
-          //       DropdownButton(
-          //   items: subjects.map((String subjects) {
-          //     return DropdownMenuItem(value: subjects, child: Text(subjects));
-          //   }).toList(),
-          //   onChanged: (String? newValue) {
-          //     setState(() {
-          //       selectedSubject = newValue;
-          //     });
-          //     if (selectedSubject != null) {
-          //       getAttendanceList();
-          //     }
-          //   },
-          //   hint: Text(selectedSubject ?? 'Select a schedule'),
-          // ),
                 const SizedBox(height: 20),
                 /*
                 *
@@ -537,42 +581,3 @@ class _CreateScheduleState extends State<CreateSchedule> {
     );
   }
 }
-
-/*
-*
-* TextFormField input components
-* This is for schedule and section
-*
-* */
-Widget createTextFormField(label, valueController, validationCondition) {
-  return TextFormField(
-      validator: validationCondition,
-      controller: valueController,
-      decoration: InputDecoration(
-        hintText: label,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
-        hintStyle: const TextStyle(
-            fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
-        focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-        //normal state of textField border
-        enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(color: Color(0x8B081631))),
-        //border style when error
-        errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(color: Color(0xFFFF0000))),
-        focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
-      ));
-}
-
-/*
-*
-* time input components
-* this is for start and end time
-*
-* */
