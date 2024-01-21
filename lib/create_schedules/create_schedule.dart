@@ -28,29 +28,29 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
     String? teacherId;
     try {
       Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-        
+          await RememberUserPreferences.readUserInfo();
+
       teacherId = teacherInfo?['teacher_id'];
-    } catch (error){
+    } catch (error) {
       print("Error lods: $error");
     }
 
-    
-    final response = await http.get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          setState(() {
-            converted = jsonDecode(response.body);
-          });
-          print("Already converted from Json: ${converted}");
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No schedules")));
-        }
+    final response = await http
+        .get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        setState(() {
+          converted = jsonDecode(response.body);
+        });
+        print("Already converted from Json: ${converted}");
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+            .showSnackBar(SnackBar(content: Text("No schedules")));
       }
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+    }
   }
 
   @override
@@ -118,7 +118,7 @@ class ListOfSchedulesWidget extends StatelessWidget {
                 const SizedBox(width: 50),
                 Text('Section Name: ${section_name}'),
                 const SizedBox(width: 50),
-                 Text('Start Time: ${start_time}'),
+                Text('Start Time: ${start_time}'),
                 const SizedBox(width: 50),
                 Text('End Time: ${end_time}'),
                 const SizedBox(width: 50),
@@ -141,13 +141,12 @@ class CreateSchedule extends StatelessWidget {
   TextEditingController dayWeekController = TextEditingController();
 
   Future<void> createSchedule() async {
-     Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
 
     String teacherId = teacherInfo?['teacher_id'];
 
-    final response = await http.post(Uri.parse(Api.createSchedule), 
-    body: {
+    final response = await http.post(Uri.parse(Api.createSchedule), body: {
       'teacher_id': teacherId,
       'subject_name': subjectNameController.text,
       'section_name': sectionNameController.text,

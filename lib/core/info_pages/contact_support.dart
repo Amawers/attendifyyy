@@ -11,16 +11,10 @@ class _ContactSupportState extends State<ContactSupport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Starting of AppBar Section
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: Image.asset(
-          'assets/images/logo.png',
-          width: 90,
-          height: 90,
-        ),
-      ),
+        title: const Text('Contact Support'), // Title of the app bar
+      ), // Ending of AppBar Section
       body: Container(
         child: Column(
           children: [
