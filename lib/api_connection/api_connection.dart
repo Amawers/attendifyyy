@@ -16,4 +16,5 @@ class Api {
   static const uploadImage = '$hostConnect/upload_image.php';
   static const retrieveImage = '$hostConnect/retrieve_image.php';
   static const deleteSchedule = '$hostConnect/create_schedule/delete_schedule.php';
+  static const updateAccount = '$hostConnect/account/update_account.php';
 }
