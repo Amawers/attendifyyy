@@ -106,8 +106,13 @@ class _AccountSettingsState extends State<AccountSettings> {
       // Starting of AppBar Section
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Account Settings'), // Title of the app bar
-      ), // Ending of AppBar Section
+        title: const Text("Account Settings", style: TextStyle(color:  Color(0xFF081631))), 
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed:  () => Navigator.pop(context),
+            ),
+        backgroundColor: Colors.white,
+      ),
       body: Stack(
         clipBehavior: Clip.none,
         children: [

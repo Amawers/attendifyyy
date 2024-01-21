@@ -1,3 +1,4 @@
+import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:attendifyyy/core/info_pages/contact_support.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,12 @@ class _AboutAppState extends State<AboutApp> {
     return Scaffold(
       // Starting of AppBar Section
       appBar: AppBar(
-        title: const Text("About App"), // Title of the app bar
+        title: const Text("About App", style: TextStyle(color:  Color(0xFF081631) )), 
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed:  () => Navigator.pop(context),
+            ),
+        backgroundColor: Colors.white,
       ), // Ending of AppBar Section
 
       body: SingleChildScrollView(
@@ -62,9 +68,8 @@ class _AboutAppState extends State<AboutApp> {
               ),
               child: const Text(
                 '''Welcome to the QR Code Attendance Checker app, your trusted attendance management solution designed especially for schools and students!
-                \nWho We Are:\nAt QR Code Attendance Checker, we are dedicated to simplifying attendance tracking for educational institutions. Our app is the brainchild of passionate individuals who understand the unique needs and challenges faced by schools and students. We are committed to providing an innovative mobile solution that saves time, reduces administrative burdens, and enhances efficiency in the education sector.
-                \nOur Mission:\nOur mission is clear - to transform attendance management in schools through a user-friendly, feature-rich mobile app. We aim to empower educators, streamline administrative processes, and ensure students' academic success by providing an intuitive and reliable QR code-based attendance tracking platform.
-                \nWhat Our App Offers:\n• Effortless Attendance Tracking: Say goodbye to manual attendance taking. Our mobile app allows teachers to quickly and accurately record attendance with just a few taps on their smartphones.\n• Real-Time Insights: Stay updated with real-time attendance data, enabling educators to identify attendance patterns and provide timely support to students who may be facing challenges.\n• Customization: Tailor our app to your school's specific needs. Whether you manage a small elementary school or a large university, our app can be adapted to your unique requirements.\n• Security: We prioritize the security of student data. Our app employs robust encryption and data protection measures to ensure the confidentiality and privacy of student information.''',
+                \nWho We Are:\n We are 3rd Year BSIT students under the guidance of Sir Gisan Dan Raniego, this is our final project for both terms. Our app is the brainchild of passionate individuals who understand the unique needs and challenges faced by schools and students. We are committed to providing an innovative mobile solution that saves time, reduces administrative burdens, and enhances efficiency in the education sector.
+                \nOur Mission:\nOur mission is clear - to transform attendance management in schools through a user-friendly, feature-rich mobile app. We aim to empower educators, streamline administrative processes, and ensure students' academic success by providing an intuitive and reliable QR code-based attendance tracking platform.''',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,

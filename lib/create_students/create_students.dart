@@ -65,31 +65,31 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       print("kani nag eror $error");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context)),
-          title:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text(
-              'Student List',
-              style: TextStyle(
-                color: Color(0xff081631),
-                fontSize: 20,
-              ),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context)),
+        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text(
+            'Student List',
+            style: TextStyle(
+              color: Color(0xff081631),
+              fontSize: 20,
             ),
-            Text(
-              '${widget.subject_name}',
-              style: const TextStyle(
-                color: Color(0xff081631),
-                fontSize: 12,
-              ),
+          ),
+          Text(
+            '${widget.subject_name}',
+            style: const TextStyle(
+              color: Color(0xff081631),
+              fontSize: 12,
             ),
-          ])),
+          ),
+        ]),
+        backgroundColor: Colors.white,
+      ),
       /*
       * display empty of studentlist is empty
       * */
