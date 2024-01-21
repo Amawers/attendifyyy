@@ -6,8 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 // List<int> dayOfWeekList = [1, 2, 3, 4, 5, 6, 7];
-List<String> dayOfWeekList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
+List<String> dayOfWeekList = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
 
 class ListOfSchedules extends StatefulWidget {
   const ListOfSchedules({super.key});
@@ -65,11 +72,13 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text("Schedule List",
+            style: TextStyle(color: Color(0xFF081631))),
         leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => const BottomNavBar()))),
-        title: const Text('Schedule List'),
+        backgroundColor: Colors.white,
       ),
       body: ListView.builder(
           padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 80.0),
@@ -132,7 +141,8 @@ class ClassScheduleCard extends StatelessWidget {
       required this.backgroundColor});
 
   Future<void> deleteSchedule(String schedule_id) async {
-    final response = await http.delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
+    final response = await http
+        .delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
     if (response.statusCode == 200) {
       print('Na delete? ${jsonDecode(response.body)}');
     }
@@ -463,17 +473,19 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   isExpanded: true, //set width to 100%
                   // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
-                 
+
                   // items: dayOfWeekList.map<DropdownMenuItem<int>>((int value) {
                   //   return DropdownMenuItem<int>(
                   //     value: value,
                   //     child: Text("$value"),
                   //   );
                   // }).toList(),
-                  items: dayOfWeekList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem(value: value, child: Text("$value"));
+                  items: dayOfWeekList
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem(
+                        value: value, child: Text("$value"));
                   }).toList(),
-                   onChanged: (String? value) {
+                  onChanged: (String? value) {
                     // This is called when the user selects an item.
                     setState(() {
                       dayWeekValue = value!;
@@ -481,20 +493,20 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   },
                 ),
 
-          //       DropdownButton(
-          //   items: subjects.map((String subjects) {
-          //     return DropdownMenuItem(value: subjects, child: Text(subjects));
-          //   }).toList(),
-          //   onChanged: (String? newValue) {
-          //     setState(() {
-          //       selectedSubject = newValue;
-          //     });
-          //     if (selectedSubject != null) {
-          //       getAttendanceList();
-          //     }
-          //   },
-          //   hint: Text(selectedSubject ?? 'Select a schedule'),
-          // ),
+                //       DropdownButton(
+                //   items: subjects.map((String subjects) {
+                //     return DropdownMenuItem(value: subjects, child: Text(subjects));
+                //   }).toList(),
+                //   onChanged: (String? newValue) {
+                //     setState(() {
+                //       selectedSubject = newValue;
+                //     });
+                //     if (selectedSubject != null) {
+                //       getAttendanceList();
+                //     }
+                //   },
+                //   hint: Text(selectedSubject ?? 'Select a schedule'),
+                // ),
                 const SizedBox(height: 20),
                 /*
                 *

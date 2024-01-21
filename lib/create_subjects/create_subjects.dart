@@ -57,7 +57,6 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
       0xFF081631,
       0xFF00315D,
     ];
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,

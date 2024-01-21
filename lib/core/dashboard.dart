@@ -36,42 +36,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Morning, $teacherName',
-              style: const TextStyle(
-                color: Color(0xff081631),
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(55),
+        child: AppBar(
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          title: Container(
+            padding: const EdgeInsets.fromLTRB(4.0, 10.0, 4.0, 4.0),
+            child: Image.asset(
+              'assets/images/logo.png',
+              width: 90,
+              height: 200,
             ),
-            const Text(
-              'Monday, 9 Nov 2023',
-              style: TextStyle(
-                color: Color(0xff081631),
-                fontSize: 13,
-              ),
-            ),
-          ],
+          ),
         ),
-        actions: [
-          Container(
-              margin: const EdgeInsets.only(right: 10.0),
-              child: const CircleAvatar(
-                backgroundColor: Colors.blue,
-                minRadius: 15,
-                maxRadius: 25,
-              ))
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 14.0),
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Morning, $teacherName',
+                    style: const TextStyle(
+                      color: Color(0xff081631),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const Text(
+                    'Monday, 9 Nov 2023',
+                    style: TextStyle(
+                      color: Color(0xff081631),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                  margin: const EdgeInsets.only(right: 10.0),
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    minRadius: 15,
+                    maxRadius: 25,
+                  )),
+            ],
+          ),
+          const SizedBox(height: 15),
           //Overview
           Container(
             decoration: BoxDecoration(

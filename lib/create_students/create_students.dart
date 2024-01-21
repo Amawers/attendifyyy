@@ -65,7 +65,6 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       print("kani nag eror $error");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
