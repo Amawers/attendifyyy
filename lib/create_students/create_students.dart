@@ -70,41 +70,97 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context)),
-          title:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xff081631)),
+            onPressed: () => Navigator.pop(context)),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               'Student List',
               style: TextStyle(
                 color: Color(0xff081631),
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
             ),
-            Text(
-              '${widget.subject_name}',
-              style: const TextStyle(
-                color: Color(0xff081631),
-                fontSize: 12,
-              ),
-            ),
-          ])),
+          ],
+        ),
+      ),
       /*
       * display empty of studentlist is empty
       * */
-      body: (studentList.isEmpty)
-          ? const Center(child: Text('Empty'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(14.0),
-              itemCount: studentList.length,
-              itemBuilder: (context, index) {
-                return ListOfStudentsWidget(
-                    first_name: studentList[index]['first_name'] ?? 'No fname',
-                    last_name: studentList[index]['last_name'] ?? 'No lname',
-                    grade_level:
-                        studentList[index]['grade_level'] ?? 'No grade level');
-              }),
+      body: Column(
+        children: [
+          Container(
+            padding:
+                const EdgeInsets.only(left: 25, right: 25, top: 30, bottom: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceBetween, // Aligns children to the start and end of the row
+              children: [
+                //text para sa subject name ug subject code
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${widget.subject_name}',
+                      style: const TextStyle(
+                        color: Color(0xff081631),
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${widget.subject_code}',
+                      style: const TextStyle(
+                        color: Color(0xff081631),
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+                //button para edit
+                Ink(
+                  decoration: const ShapeDecoration(
+                    color:
+                        Color(0xff081631), // set ang background color sa button
+                    shape: CircleBorder(),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.white, // set ang color sa icon
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: (studentList.isEmpty)
+                ? const Center(child: Text('Empty'))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(14.0),
+                    itemCount: studentList.length,
+                    itemBuilder: (context, index) {
+                      return ListOfStudentsWidget(
+                        first_name:
+                            studentList[index]['first_name'] ?? 'No fname',
+                        last_name:
+                            studentList[index]['last_name'] ?? 'No lname',
+                        grade_level: studentList[index]['grade_level'] ??
+                            'No grade level',
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF081631),
         onPressed: () {
@@ -142,7 +198,7 @@ class ListOfStudentsWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10.0),
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF00315D),
+        color: const Color(0xFF081631),
         borderRadius: BorderRadius.circular(14.0),
       ),
       child: Row(
@@ -164,7 +220,7 @@ class ListOfStudentsWidget extends StatelessWidget {
             child: Text(grade_level,
                 style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 14.0,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold)),
           )
         ],
