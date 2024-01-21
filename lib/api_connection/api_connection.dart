@@ -15,4 +15,5 @@ class Api {
   static const getTeacherData = '$hostConnect/utils/teacher_data.php';
   static const uploadImage = '$hostConnect/upload_image.php';
   static const retrieveImage = '$hostConnect/retrieve_image.php';
+  static const deleteSchedule = '$hostConnect/create_schedule/delete_schedule.php';
 }

@@ -6,15 +6,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Privacy Policy"),
+       appBar: AppBar(
+        title: const Text("Privacy Policy", style: TextStyle(color:  Color(0xFF081631))), 
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed:  () => Navigator.pop(context),
+            ),
+        backgroundColor: Colors.white,
       ),
+
+      // Body with Privacy Policy Information
       body: ListView(
         padding: const EdgeInsets.all(14.0),
         children: [
           const Column(
             children: [
-              //paragraph
+              // Paragraphs about Privacy Policy
               Text(
                 "Thank you  for choosing the QR Code Attendance Checker App. We are committed to safeguarding your privacy and ensuring the security of your personal information. This Privacy Policy outlines how we collect, use, disclose, and protect your data. By using our app, you consent to the practices described herei",
                 style: TextStyle(fontSize: 14),
@@ -40,10 +47,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 14),
                 textAlign: TextAlign.justify,
               ),
-              //number ordered list
+              // Numbered ordered list
             ],
           ),
           const SizedBox(height: 12.0),
+
+          // Container with Privacy Policy Information
           Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
