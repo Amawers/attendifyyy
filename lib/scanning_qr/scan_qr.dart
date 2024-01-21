@@ -13,6 +13,10 @@ class ScanQrScreen extends StatefulWidget {
 
 class _ScanQrScreenState extends State<ScanQrScreen> {
   String? id;
+  String firstName = '';
+  String middleInitial = '';
+  String lastName = '';
+
   List<String> schedules = [];
   String? selectedSchedule;
 
@@ -20,10 +24,24 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
   List<dynamic> converted = [];
 
+  // Initialization for subject selection
+  // Remove lang ni pag implement nimos backend then puliha tung naa sa dropdown to the retrieved schedules.
+  String? selectedSubject;
+  List<String> subjects = [
+    'Mobile Programming',
+    'IT Elective 1',
+    'Networking 2'
+  ];
+
   @override
   void initState() {
     super.initState();
     getListOfSchedules();
+
+    // To immediately be greeted with the pop up dialog when opening the QR Scanner
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      _showSubjectSelectionDialog(context);
+    });
   }
 
   Future<void> getListOfSchedules() async {
@@ -63,10 +81,9 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
       if (attributes.length == 5) {
         id = attributes[0];
-        String firstName = attributes[1];
-        String? middleInitial =
-            attributes[2]?.isNotEmpty == true ? attributes[2] : null;
-        String lastName = attributes[3];
+        firstName = attributes[1];
+        middleInitial = attributes[2]?.isNotEmpty == true ? attributes[2] : '';
+        lastName = attributes[3];
         String course = attributes[4];
         // Values are printed inside the debug console to check if it has successfully retrieved information from a QR Code after scanning.
         print('Barcode Found!');
@@ -82,17 +99,27 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         } catch (error) {
           print("Wala na process ang attendance");
         }
+
+        setState(() {
+          // To update the displayed scanned name
+        });
       } else {
         print('Not valid.');
       }
     }
   }
 
+  // Method to concatenate the scanned name to Full Name
+  String concatenateScannedName(String fName, String mInitial, String lName) {
+    return '$fName ${mInitial.isNotEmpty ? '$mInitial ' : ''}$lName';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       // Starting of AppBar Section with Logo
-       appBar: PreferredSize(
+      appBar: PreferredSize(
         preferredSize: const Size.fromHeight(55),
         child: AppBar(
           centerTitle: true,
@@ -107,61 +134,219 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
             ),
           ),
         ),
-      ),  // Ending of AppBar Section
+      ), // Ending of AppBar Section
 
       body: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            // Flex Container for the entirety of the body of the scan_page
-            Expanded(
-              flex: 4,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  // // This is THE Scanner/Camera with scanning functionality using the pre-built onDetect function of the mobile_scanner package.
-                  MobileScanner(
-                    controller: MobileScannerController(
-                        detectionSpeed: DetectionSpeed.noDuplicates),
-                    onDetect: (capture) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      for (final barcode in barcodes) {
-                        processResult(barcode.rawValue);
-                      }
-                    },
-                  ),
-                  // Design overlay for the QR Scanner.
-                  const ScanQrOverlay(
-                      overlayColour: Color.fromARGB(255, 255, 255, 255)),
+            // THE QR Scanner
+            Positioned.fill(
+              top: -150,
+              child: MobileScanner(
+                controller: MobileScannerController(
+                  detectionSpeed: DetectionSpeed.noDuplicates,
+                ),
+                onDetect: (capture) {
+                  final List<Barcode> barcodes = capture.barcodes;
+                  for (final barcode in barcodes) {
+                    processResult(barcode.rawValue);
+                  }
+                },
+              ),
+            ),
 
-                  const SizedBox(
-                    height: 50,
-                    child: Text(
-                      'Scan the QR code to check attendance',
-                      style: TextStyle(color: Color(0xFF081631)),
+            // Design overlay for the QR Scanner.
+            const Positioned.fill(
+              top: -150,
+              child: ScanQrOverlay(
+                overlayColour: Color.fromARGB(255, 255, 255, 255),
+              ),
+            ),
+
+            // Text directly below the QR Scanner
+            const Positioned(
+              bottom: 210,
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Scan the QR code to check attendance',
+                    style: TextStyle(
+                      color: Color(0xFF081631),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
             ),
-            // Container where we can add elements below the QR scanner
-            DropdownButton(
-              items: schedules.map((String schedules) {
-                return DropdownMenuItem(
-                    value: schedules, child: Text(schedules));
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedSchedule = newValue;
-                });
-              },
-              hint: Text('Select a schedules'),
-            )
+
+            // Text above the QR Scanner (Subject Name)
+            Positioned(
+              top: 60,
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    selectedSubject != null
+                        ? '$selectedSubject'
+                        : 'Choose a subject',
+                    style: const TextStyle(
+                      color: Color(0xff081631),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Scanned Name Display
+            Positioned(
+              bottom: 100,
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (firstName.isNotEmpty || lastName.isNotEmpty)
+                    Column(
+                      children: [
+                        // The displayed scanned name
+                        Text(concatenateScannedName(firstName, middleInitial, lastName),
+                          style: const TextStyle(
+                            color: Color(0xff081631),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        
+                        // "PRESENT" Text
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.person_pin_rounded,
+                                color: Color.fromARGB(255, 50, 216, 55),
+                                size: 16),
+
+                            SizedBox(
+                              width: 5,
+                            ),
+
+                            Text(
+                              'PRESENT',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 50, 216, 55),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                ],
+              ),
+            ),
+
+            // Change Subject Button way below the QR Scanner
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: ElevatedButton(
+                onPressed: () {
+                  _showSubjectSelectionDialog(context);
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                    const Size.fromHeight(50),
+                  ),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(const Color(0xFF081631)),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'Change Subject',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  // The "Select Subject" pop up dialog with the Dropdown menu
+  void _showSubjectSelectionDialog(BuildContext context) async {
+    final selected = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          alignment: Alignment.center,
+          title: const Text(
+            "Select Subject",
+            style: TextStyle(
+              color: Color(0xff081631),
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
+          // Diri sulod sa content i change pang backend nimo
+          content: DropdownButtonFormField(
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  width: 1,
+                  color: Color(0xff081631),
+                ),
+              ),
+            ),
+            value: selectedSubject,
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedSubject = newValue;
+              });
+              Navigator.pop(context, newValue);
+            },
+            items: subjects.map((String value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            hint: const Text('Select subject'),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        selectedSubject = selected;
+      });
+    }
   }
 }
 
