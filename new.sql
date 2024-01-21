@@ -6,7 +6,8 @@ CREATE TABLE teachers (
     email VARCHAR(255),
     password VARCHAR(255),
     phone_number VARCHAR(20),
-    department VARCHAR(255)
+    department VARCHAR(255),
+    profile_pic_path VARCHAR(255) NULL
 );
 
 CREATE TABLE sections (

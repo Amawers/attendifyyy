@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/core/account_settings/image_upload.dart';
 import 'package:attendifyyy/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -22,11 +23,13 @@ class _AccountSettingsState extends State<AccountSettings> {
   TextEditingController departmentController = TextEditingController();
 
   List<dynamic> teacherData = [];
+  String? imagePath;
 
   @override
   void initState() {
     super.initState();
     getTeacherData();
+    retrieveImage();
   }
 
   Future<void> getTeacherData() async {
@@ -51,6 +54,50 @@ class _AccountSettingsState extends State<AccountSettings> {
     // passwordController.text = teacherData[0];
     contactNoController.text = teacherData[0]['phone_number'];
     departmentController.text = teacherData[0]['department'];
+  }
+
+  Future<void> retrieveImage() async {
+    String? teacherId;
+    try {
+      // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error loading user info: $error");
+    }
+
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.retrieveImage}?teacher_id=$teacherId'));
+
+      // Check if the response status code is OK (200)
+      if (response.statusCode == 200) {
+        // Decode the JSON response body
+        Map<String, dynamic> responseBody = json.decode(response.body);
+
+        // Check the 'status' field in the response
+        if (responseBody['status'] == 1) {
+          // Assuming the image path is stored in the 'image_path' field
+          imagePath = responseBody['image_path'];
+
+          // Do something with the imagePath, e.g., display the image
+          print("Image Path: $imagePath");
+        } else {
+          // Handle the case where the status is not 1
+          print("Failed to retrieve image path: ${responseBody['status']}");
+        }
+      } else {
+        // Handle non-OK status codes
+        print("Failed to retrieve image. Status code: ${response.statusCode}");
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print("Error during image retrieval: $error");
+    }
+    setState(() {
+      
+    });
   }
 
   @override
@@ -78,18 +125,49 @@ class _AccountSettingsState extends State<AccountSettings> {
               Padding(
                 padding: const EdgeInsets.only(top: 30.0),
                 child: Center(
-                  child: Container(
-                    width: 110.0,
-                    height: 110.0,
-                    child: const ClipOval(
-                      child: CircleAvatar(
-                        radius: 60.0,
-                        backgroundColor: Colors.grey,
-                        // backgroundImage:
-                        //     NetworkImage('https://picsum.photos/250?image=9'),
+                  child: Stack(children: [
+                    Container(
+                      width: 110.0,
+                      height: 110.0,
+                      child: ClipOval(
+                        child: CircleAvatar(
+                            radius: 60.0,
+                            backgroundColor: Colors.grey,
+                            backgroundImage: imagePath != null
+                                ? Image.network(
+                                        'http://192.168.1.11/attendifyyy_backend/$imagePath')
+                                    .image
+                                : Image.asset('assets/images/logo.png')
+                                    .image),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ImageUpload()),
+                          );
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 4, color: Colors.white),
+                            color: Colors.blue,
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                  ]),
                 ),
               ),
 
@@ -143,7 +221,9 @@ class _AccountSettingsState extends State<AccountSettings> {
                     const SizedBox(height: 40),
 
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        retrieveImage();
+                      },
                       style: ButtonStyle(
                         minimumSize: MaterialStateProperty.all<Size>(
                             const Size.fromHeight(60)),
