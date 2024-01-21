@@ -71,11 +71,13 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text("Schedule List",
+            style: TextStyle(color: Color(0xFF081631))),
         leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => const BottomNavBar()))),
-        title: const Text('Schedule List'),
+        backgroundColor: Colors.white,
       ),
       body: ListView.builder(
           padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 80.0),
