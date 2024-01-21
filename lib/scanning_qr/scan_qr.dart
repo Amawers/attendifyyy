@@ -91,6 +91,24 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Starting of AppBar Section with Logo
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100.0),
+        child: AppBar(
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          title: Container(
+            padding: const EdgeInsets.fromLTRB(4.0, 10.0, 4.0, 4.0),
+            child: Image.asset(
+              'assets/images/logo.png',
+              width: 90,
+              height: 200,
+            ),
+          ),
+        ),
+      ), // Ending of AppBar Section
+
       body: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),

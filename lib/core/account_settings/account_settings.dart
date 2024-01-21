@@ -103,8 +103,11 @@ class _AccountSettingsState extends State<AccountSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Starting of AppBar Section
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('Account Settings'), // Title of the app bar
+      ), // Ending of AppBar Section
       body: Stack(
         clipBehavior: Clip.none,
         children: [
