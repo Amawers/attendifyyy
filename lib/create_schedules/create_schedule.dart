@@ -299,6 +299,41 @@ class _CreateScheduleState extends State<CreateSchedule> {
   TimeOfDay endTime = TimeOfDay.now();
   String? dayWeekValue;
 
+  List<dynamic> converted = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getListOfSubjects();
+  }
+
+  Future<void> getListOfSubjects() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String? teacherId = teacherInfo?['teacher_id'];
+    if (teacherId != null && teacherId.isNotEmpty) {
+      final response = await http
+          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          setState(() {
+            converted = jsonDecode(response.body);
+          });
+          // print("KANI SIYAAAA: ${converted[index]['subject_name']}");
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("No subjects")));
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
+      }
+    } else {
+      print("Error: Teacher ID is null or empty");
+    }
+  }
+
   //post newly created schedule to the database
   Future<void> createSchedule() async {
     Map<String, dynamic>? teacherInfo =
@@ -307,6 +342,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
     String teacherId = teacherInfo?['teacher_id'];
 
     print("Sulod sa start time: ${startTime}");
+    print('subject name sa FUNCTION $subjectNameValue');
+    print('section name sa FUNCTION $sectionNameValue');
 
     final response = await http.post(Uri.parse(Api.createSchedule), body: {
       'teacher_id': teacherId,
@@ -358,7 +395,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
+                            BorderSide(width: 2, color: Color(0xFF081631))),
                     //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -367,56 +404,21 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   isExpanded: true, //set width to 100%
                   // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
-                  items: ['Mobile Programming', 'IAS']
-                      .map<DropdownMenuItem<String>>((String value) {
+                  items:
+                      converted.map<DropdownMenuItem<String>>((dynamic value) {
+                    String combinedValue =
+                        "${value['section_name']} - ${value['subject_name']}";
                     return DropdownMenuItem(
-                        value: value, child: Text("$value"));
+                        value: combinedValue, child: Text(combinedValue));
                   }).toList(),
                   onChanged: (String? value) {
-                    // This is called when the user selects an item.
+                    List<String> values = value!.split(RegExp(r'\s-\s'));
+                    print('SA SETSTATE ${values[0]}');
                     setState(() {
-                      subjectNameValue = value!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                /*
-                *
-                * Dropdown for section
-                *
-                * */
-                DropdownButtonFormField<String>(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "This field is required.";
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    labelText: "Section",
-                    contentPadding: const EdgeInsets.all(16.0),
-                    //border style when its focus
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
-                    //border radius
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  items: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem(
-                        value: value, child: Text("$value"));
-                  }).toList(),
-                  onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      sectionNameValue = value!;
+                      sectionNameValue = values[0];
+                      subjectNameValue = values[1];
+                      print('section name sa SETSTATE $sectionNameValue');
+                      print('subject name sa SETSTATE $subjectNameValue');
                     });
                   },
                 ),
