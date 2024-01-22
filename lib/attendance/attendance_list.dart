@@ -155,15 +155,22 @@ class _AttendanceReportState extends State<AttendanceReport> {
                         icon: const Visibility(
                             visible: false, child: Icon(Icons.arrow_downward)),
                         //hint or placeholder of the dropdownbutton
-                        hint: Row(
-                          children: [
-                            Text(selectedSubject ?? 'Select a schedule',
-                                style: const TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF081631))),
-                            const Icon(Icons.arrow_drop_down)
-                          ],
+                        //this box limit the width of the row widget
+                        hint: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 200.0),
+                          child: Row(
+                            children: [
+                              //flexible allows text child to adjust
+                              Flexible(child: Text(selectedSubject ?? 'Select a schedule',
+                                  style: const TextStyle(
+                                      //with overflow it hide or turn the overflowed text into ellipsis
+                                      overflow: TextOverflow.ellipsis,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF081631)))),
+                              const Icon(Icons.arrow_drop_down)
+                            ],
+                          ),
                         )),
                     //current date
                     Text(currentDate,
