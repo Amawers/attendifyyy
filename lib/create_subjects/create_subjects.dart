@@ -37,7 +37,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
           setState(() {
             converted = jsonDecode(response.body);
           });
-          print("Already converted from Json: $converted");
+          print("PANGITA SUBJECT TEACHER ID: $converted");
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text("No subjects")));
@@ -77,6 +77,8 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
               itemCount: converted.length,
               itemBuilder: (context, index) {
                 return ListOfSubjectsWidget(
+                  subject_teachers_id:
+                      converted[index]['subject_teachers_id'] ?? 'tesssst',
                   subject_name: converted[index]['subject_name'] ?? 'tesssst',
                   subject_code: converted[index]['subject_code'] ?? 'tesssst',
                   section_name: converted[index]['section_name'] ?? 'tesssst',
@@ -105,6 +107,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
 }
 
 class ListOfSubjectsWidget extends StatelessWidget {
+  String subject_teachers_id;
   String subject_name;
   String subject_code;
   String section_name;
@@ -113,6 +116,7 @@ class ListOfSubjectsWidget extends StatelessWidget {
   int backgroundColor;
 
   ListOfSubjectsWidget({
+    required this.subject_teachers_id,
     required this.subject_name,
     required this.subject_code,
     required this.section_name,
@@ -131,6 +135,7 @@ class ListOfSubjectsWidget extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) => Dialog.fullscreen(
                       child: ListOfStudentsScreen(
+                          subject_teachers_id: subject_teachers_id,
                           section_id: section_id,
                           subject_code: subject_code,
                           subject_id: subject_id,
@@ -155,12 +160,15 @@ class ListOfSubjectsWidget extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(subject_name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24.0,
-                            )),
+                        Flexible(
+                          child: Text(subject_name,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24.0,
+                              )),
+                        ),
                         const SizedBox(width: 20),
                         //POPUP PARAS EDIT AND DELETE
                         PopupMenuButton(
@@ -208,15 +216,24 @@ class ListOfSubjectsWidget extends StatelessWidget {
 
                                 showDialog(
                                     context: context,
-                                    builder: (BuildContext context) =>
-                                        Dialog(child: EditSubject()));
+                                    builder: (BuildContext context) => Dialog(
+                                        child: EditSubject(
+                                            subject_teachers_id:
+                                                subject_teachers_id,
+                                            subject_id: subject_id,
+                                            subject_name: subject_name,
+                                            subject_code: subject_code,
+                                            section_name: section_name)));
                               } else if (value == 1) {
                                 print("Subject delete.");
 
                                 showDialog(
                                     context: context,
-                                    builder: (BuildContext context) =>
-                                        Dialog(child: DeleteSubject()));
+                                    builder: (BuildContext context) => Dialog(
+                                            child: DeleteSubject(
+                                          subject_id: subject_id,
+                                          section_id: section_id,
+                                        )));
                               }
                             }),
                       ],
@@ -256,16 +273,61 @@ class ListOfSubjectsWidget extends StatelessWidget {
 
 //FUNCTION OR METHOD PARAS EDIT NGA MENU
 class EditSubject extends StatefulWidget {
+  String? subject_id;
+  String? subject_name;
+  String? subject_code;
+  String? section_name;
+  String? subject_teachers_id;
+  EditSubject(
+      {required this.subject_id,
+      required this.subject_name,
+      required this.subject_code,
+      required this.section_name,
+      required this.subject_teachers_id});
   @override
   _EditSubject createState() => _EditSubject();
 }
 
 class _EditSubject extends State<EditSubject> {
+  List<dynamic> subjectData = [];
+
   TextEditingController subjectNameController = TextEditingController();
   TextEditingController subjectCodeController = TextEditingController();
   TextEditingController sectionNameController = TextEditingController();
   String semesterValue = semesterList.first;
   final _subjectFormKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    getSubjectData();
+  }
+
+  Future<void> getSubjectData() async {
+    // // final response = await http.get(
+    // //     Uri.parse('${Api.getSubjectData}?subject_id=${widget.subject_id}'));
+    // // subjectData = jsonDecode(response.body);
+    // print("SUBJECT DATA NIYA: $subjectData");
+    subjectNameController.text = widget.subject_name!;
+    subjectCodeController.text = widget.subject_code!;
+    sectionNameController.text = widget.section_name!;
+  }
+
+  Future<void> editSubject() async {
+    final response = await http.put(Uri.parse(Api.updateSubjectData), body: {
+      'subject_teachers_id': widget.subject_teachers_id,
+      'subject_name': subjectNameController.text,
+      'subject_code': subjectCodeController.text,
+      'section_name': sectionNameController.text,
+      'semester': semesterValue
+    });
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print("nag error connect sa backend");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +393,12 @@ class _EditSubject extends State<EditSubject> {
                       //validate textfields
                       if (_subjectFormKey.currentState!.validate()) {
                         //create subject in the database
-                        EditSubject();
+                        // EditSubject(
+                        //     subject_id: widget.subject_id,
+                        //     section_name: widget.section_name,
+                        //     subject_code: widget.subject_code,
+                        //     subject_name: widget.subject_name);
+                        editSubject();
                         Navigator.of(context, rootNavigator: true)
                             .pop(); //close dialog
                       }
@@ -366,13 +433,24 @@ class _EditSubject extends State<EditSubject> {
 
 //FUNCTION OR METHOD PARAS DELETE MENU
 class DeleteSubject extends StatefulWidget {
-  const DeleteSubject({super.key});
+  String? subject_id;
+  String? section_id;
+  DeleteSubject({required this.subject_id, required this.section_id});
 
   @override
   State<DeleteSubject> createState() => _DeleteSubjectState();
 }
 
 class _DeleteSubjectState extends State<DeleteSubject> {
+  Future<void> deleteSubject() async {
+    final response = await http.delete(Uri.parse(Api.deleteSubject), body: {
+      'subject_id': widget.subject_id,
+      'section_id': widget.section_id
+    });
+    print(response.body);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -393,44 +471,52 @@ class _DeleteSubjectState extends State<DeleteSubject> {
                 fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.check,
-                ),
-                label: const Text(
-                  'YES',
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF081631), // Background color of the button
-                  onPrimary: Colors.white, // Text color on the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Set border radius
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    deleteSubject();
+                  },
+                  icon: const Icon(
+                    Icons.check,
                   ),
-                  elevation: 4.0, // Set elevation
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.cancel),
-                label: const Text(
-                  'NO',
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF081631), // Background color of the button
-                  onPrimary: Colors.white, // Text color on the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Set border radius
+                  label: const Text(
+                    'YES',
                   ),
-                  elevation: 4.0, // Set elevation
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
                 ),
-              ),
-            ],
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.cancel),
+                  label: const Text(
+                    'NO',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
+                ),
+              ],
+            ),
           )
         ],
       ),
