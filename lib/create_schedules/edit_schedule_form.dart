@@ -4,7 +4,6 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:http/http.dart' as http;
 
-
 List<String> dayOfWeekList = [
   "Monday",
   "Tuesday",
@@ -15,9 +14,16 @@ List<String> dayOfWeekList = [
   "Sunday"
 ];
 
-
 class EditSchedule extends StatefulWidget {
-  const EditSchedule({super.key});
+  String? schedule_id;
+  String? start_time;
+  String? end_time;
+  String? day_of_week;
+  EditSchedule(
+      {required this.schedule_id,
+      required this.start_time,
+      required this.end_time,
+      required this.day_of_week});
 
   @override
   State<EditSchedule> createState() => _EditScheduleState();
@@ -41,7 +47,7 @@ class _EditScheduleState extends State<EditSchedule> {
 
   Future<void> getListOfSubjects() async {
     Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
+        await RememberUserPreferences.readUserInfo();
 
     String? teacherId = teacherInfo?['teacher_id'];
     if (teacherId != null && teacherId.isNotEmpty) {
@@ -67,13 +73,21 @@ class _EditScheduleState extends State<EditSchedule> {
   }
 
   //post newly created schedule to the database
-  // Future<void> editSchedule() async {
-  // }
+  Future<void> editSchedule() async {
+    final response = await http.put(Uri.parse(Api.updateSchedule), body: {
+      'schedule_id': widget.schedule_id,
+      'start_time': "$startTime.",
+      'end_time': "$endTime",
+      'days_of_week': _dayWeekValue
+    });
+
+    print(response.body);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 480,
+      height: 420,
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
@@ -85,53 +99,6 @@ class _EditScheduleState extends State<EditSchedule> {
           Form(
               key: _subjectFormKey,
               child: Column(children: [
-                const SizedBox(height: 20),
-                /*
-                *
-                * Dropdown for subject name
-                *
-                * */
-                DropdownButtonFormField<String>(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "This field is required.";
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    labelText: "Subject",
-                    contentPadding: const EdgeInsets.all(16.0),
-                    //border style when its focus
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
-                    //border radius
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  items:
-                  converted.map<DropdownMenuItem<String>>((dynamic value) {
-                    String combinedValue =
-                        "${value['section_name']} - ${value['subject_name']}";
-                    return DropdownMenuItem(
-                        value: combinedValue, child: Text(combinedValue));
-                  }).toList(),
-                  onChanged: (String? value) {
-                    List<String> values = value!.split(RegExp(r'\s-\s'));
-                    print('SA SETSTATE ${values[0]}');
-                    setState(() {
-                      _sectionNameValue = values[0];
-                      _subjectNameValue = values[1];
-                      print('section name sa SETSTATE $_sectionNameValue');
-                      print('subject name sa SETSTATE $_subjectNameValue');
-                    });
-                  },
-                ),
                 const SizedBox(height: 20),
                 /*
                 *
@@ -226,13 +193,13 @@ class _EditScheduleState extends State<EditSchedule> {
                 * */
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
-                    labelText: "Days in a week",
+                    labelText: "${widget.day_of_week}",
                     contentPadding: const EdgeInsets.all(16.0),
                     //border style when its focus
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
+                            BorderSide(width: 2, color: Color(0xFF081631))),
                     //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -262,11 +229,7 @@ class _EditScheduleState extends State<EditSchedule> {
                 TextButton(
                     onPressed: () {
                       print("pressed");
-                      //validate input fields
-                      if (_subjectFormKey.currentState!.validate()) {
-                        print("submitted");
-                        //editSchedule();
-                      }
+                      editSchedule();
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(
@@ -280,8 +243,8 @@ class _EditScheduleState extends State<EditSchedule> {
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          )),
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
                     ),
                     child: const Text("Edit",
                         style: TextStyle(

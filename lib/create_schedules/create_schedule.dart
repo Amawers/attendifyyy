@@ -188,20 +188,12 @@ class ClassScheduleCard extends StatelessWidget {
                               const Icon(Icons.more_vert, color: Colors.white),
                           itemBuilder: (context) {
                             return [
-                              PopupMenuItem<int>(
+                              const PopupMenuItem<int>(
                                 value: 0,
                                 child: Row(children: [
-                                  const Icon(Icons.edit, size: 18.0),
-                                  const SizedBox(width: 5.0),
-                                  TextButton(
-                                      onPressed: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) =>
-                                                Dialog(
-                                                    child: EditSchedule()));
-                                      },
-                                      child: const Text("Edit")),
+                                  Icon(Icons.edit, size: 18.0),
+                                  SizedBox(width: 5.0),
+                                  Text("Edit"),
                                 ]),
                               ),
                               const PopupMenuItem<int>(
@@ -216,7 +208,10 @@ class ClassScheduleCard extends StatelessWidget {
                           },
                           onSelected: (value) {
                             if (value == 0) {
-                              print("Class Schedule update.");
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      Dialog(child: EditSchedule(schedule_id: schedule_id, start_time: start_time, end_time: end_time, day_of_week: day_of_week)));
                             } else if (value == 1) {
                               // print("Class Schedule delete.");
                               deleteSchedule(schedule_id);
@@ -278,4 +273,3 @@ class ClassScheduleCard extends StatelessWidget {
         ));
   }
 }
-
