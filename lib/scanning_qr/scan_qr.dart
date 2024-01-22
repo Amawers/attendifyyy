@@ -17,61 +17,54 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   String middleInitial = '';
   String lastName = '';
 
-  List<String> schedules = [];
-  String? selectedSchedule;
-
   List<dynamic> studentAttendanceData = [];
-
   List<dynamic> converted = [];
 
   // Initialization for subject selection
   // Remove lang ni pag implement nimos backend then puliha tung naa sa dropdown to the retrieved schedules.
   String? selectedSubject;
-  List<String> subjects = [
-    'Mobile Programming',
-    'IT Elective 1',
-    'Networking 2'
-  ];
+  String? selectedSectionName;
+  List<String> subjects = [];
 
   @override
   void initState() {
     super.initState();
-    getListOfSchedules();
+    getListOfSubjects();
 
     // To immediately be greeted with the pop up dialog when opening the QR Scanner
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+         await getListOfSubjects();
       _showSubjectSelectionDialog(context);
     });
   }
 
-  Future<void> getListOfSchedules() async {
-    String? teacherId;
-    try {
-      Map<String, dynamic>? teacherInfo =
-          await RememberUserPreferences.readUserInfo();
+  Future<void> getListOfSubjects() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
 
-      teacherId = teacherInfo?['teacher_id'];
-    } catch (error) {
-      print("Error lods: $error");
-    }
-
-    final response = await http
-        .get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
-    if (response.statusCode == 200) {
-      if (response.body.isNotEmpty) {
-        converted = jsonDecode(response.body);
-        print("list of schedules if nakuha ba: ${converted}");
-        setState(() {
-          schedules = List<String>.from(converted
-              .map((dynamic subject) => subject['schedule_id'].toString()));
-        });
+    String? teacherId = teacherInfo?['teacher_id'];
+    if (teacherId != null && teacherId.isNotEmpty) {
+      final response = await http
+          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          converted = jsonDecode(response.body);
+          print('VALUE OF CONVERTED: $converted');
+          setState(() {
+            subjects = List<String>.from(converted
+                .map((dynamic subject) => subject['subject_name'].toString()));
+          });
+          print("sulod sa subjects: $subjects");
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("No subjects")));
+        }
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("No schedules")));
+            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
       }
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+      print("Error: Teacher ID is null or empty");
     }
   }
 
@@ -90,9 +83,11 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         print(
             'ID: $id\nFirst Name: $firstName\nMiddle Initial: ${middleInitial ?? ''}\nLast Name: $lastName\nCourse: $course');
 
+        print(
+            "BEFORE E PROCESS SELECTED SUBJECT: ${selectedSubject} & REFERENCE ID: ${id}");
         try {
           final response = await http.post(Uri.parse(Api.createAttendance),
-              body: {'schedule_id': selectedSchedule, 'reference_number': id});
+              body: {'subject_name': selectedSubject, 'reference_number': id});
           if (response.statusCode == 200) {
             print(jsonDecode(response.body));
           }
@@ -168,7 +163,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
             // Text directly below the QR Scanner
             const Positioned(
-              bottom: 210,
+              bottom: 180,
               left: 0,
               right: 0,
               child: Column(
@@ -188,7 +183,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
             // Text above the QR Scanner (Subject Name)
             Positioned(
-              top: 60,
+              top: 15,
               left: 0,
               right: 0,
               child: Column(
@@ -201,7 +196,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                     style: const TextStyle(
                       color: Color(0xff081631),
                       fontWeight: FontWeight.bold,
-                      fontSize: 24,
+                      fontSize: 18,
                     ),
                   ),
                 ],
@@ -220,18 +215,20 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                     Column(
                       children: [
                         // The displayed scanned name
-                        Text(concatenateScannedName(firstName, middleInitial, lastName),
+                        Text(
+                          concatenateScannedName(
+                              firstName, middleInitial, lastName),
                           style: const TextStyle(
                             color: Color(0xff081631),
                             fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                            fontSize: 16,
                           ),
                         ),
 
                         const SizedBox(
                           height: 10,
                         ),
-                        
+
                         // "PRESENT" Text
                         const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -239,11 +236,9 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                             Icon(Icons.person_pin_rounded,
                                 color: Color.fromARGB(255, 50, 216, 55),
                                 size: 16),
-
                             SizedBox(
                               width: 5,
                             ),
-
                             Text(
                               'PRESENT',
                               style: TextStyle(
@@ -299,6 +294,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
   // The "Select Subject" pop up dialog with the Dropdown menu
   void _showSubjectSelectionDialog(BuildContext context) async {
+
     final selected = await showDialog(
       context: context,
       builder: (BuildContext context) {
