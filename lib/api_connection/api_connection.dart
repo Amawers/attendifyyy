@@ -17,4 +17,10 @@ class Api {
   static const retrieveImage = '$hostConnect/retrieve_image.php';
   static const deleteSchedule = '$hostConnect/create_schedule/delete_schedule.php';
   static const updateAccount = '$hostConnect/account/update_account.php';
+  static const getStudentData = '$hostConnect/create_student/student_data.php';
+  static const updateStudentData = '$hostConnect/create_student/update_student.php';
+  static const deleteStudent = '$hostConnect/create_student/delete_student.php';
+  static const deleteSubject = '$hostConnect/create_subject/delete_subject.php';
+  static const getSubjectData = '$hostConnect/create_subject/subject_data.php';
+  static const updateSubjectData = '$hostConnect/create_subject/update_subject.php';
 }
