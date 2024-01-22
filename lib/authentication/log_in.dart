@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/sign_up.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
@@ -15,17 +15,52 @@ class LogIn extends StatefulWidget {
   _LogInState createState() => _LogInState();
 }
 
+// tabang
 class _LogInState extends State<LogIn> {
   bool obscurePassword = true;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
+  // var rememberMe = false;
   final _formKey = GlobalKey<FormState>();
 
   String _response = "";
+  String? email;
+  String? pass;
+  var resBodyOfLogin;
+  Map<String, dynamic>? teacherInfo;
 
+  //first load
+  @override
+  void initState() {
+    super.initState();
+    // fillInLoginCredentials();
+  }
+
+  //in first page load if there is an existing credentials stored in local storage
+  //occupy the email and password controller with those values
+  // Future<void> fillInLoginCredentials() async {
+  //   teacherInfo = await RememberUserPreferences.readUserInfo();
+  //   email = teacherInfo?['email'] ?? "";
+  //   pass = teacherInfo?['password'] ?? "";
+
+  //   print("email niya ${email}");
+  //   print("pass niya ${pass}");
+
+  //   if(rememberMe == true){
+  //   try {
+  //     setState(() {
+  //       emailController.text = email!;
+  //       passwordController.text = pass!;
+  //     });
+  //   } catch (error) {
+  //     print("way data email ug pass");
+  //   }}
+  // }
+
+  //post credential to database
   Future<void> postSignUp() async {
+    //this is for post
     final response = await http.post(
       Uri.parse(Api.logIn),
       body: {
@@ -35,7 +70,7 @@ class _LogInState extends State<LogIn> {
     );
 
     if (response.statusCode == 200) {
-      var resBodyOfLogin = jsonDecode(response.body);
+      resBodyOfLogin = jsonDecode(response.body);
       if (resBodyOfLogin['success'] == true) {
         Navigator.pushReplacement(
           context,
@@ -55,6 +90,29 @@ class _LogInState extends State<LogIn> {
         _response = 'Not connected to backend or no response';
       });
     }
+
+    /*
+    *
+    * this is for remembering credentials
+    *
+    * */
+
+    //remember credentials if remember me checkbox is checked
+    // if (rememberMe) {
+    //   //check if remember credentials not exist in local storage
+    //   if (teacherInfo == null) {
+    //     //if not exist, store credentials to local
+    //     await RememberUserPreferences.storeUserInfo(
+    //         resBodyOfLogin["teacherData"]);
+    //   }
+    // }
+    //if remember me checkbox is unchecked, remove the local stored credentials
+    // else if (!rememberMe) {
+    //   if (teacherInfo != null) {
+    //     await RememberUserPreferences.deleteUserInfo();
+    //   }
+    // }
+    setState(() {});
   }
 
   @override
@@ -132,6 +190,24 @@ class _LogInState extends State<LogIn> {
                   return null;
                 },
               ),
+              const SizedBox(height: 7),
+              // Row(
+              //   children: [
+              //     Checkbox(
+              //         value: rememberMe,
+              //         activeColor: const Color(0xFF081631),
+              //         onChanged: (value) {
+              //           setState(() {
+              //             rememberMe = !rememberMe;
+              //           });
+              //         }),
+              //     const Text("Remember Me",
+              //         style: TextStyle(
+              //             color: Color(0xFF081631),
+              //             fontSize: 13.0,
+              //             fontWeight: FontWeight.bold))
+              //   ],
+              // ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {

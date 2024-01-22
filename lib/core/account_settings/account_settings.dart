@@ -18,7 +18,6 @@ class _AccountSettingsState extends State<AccountSettings> {
   TextEditingController fnameController = TextEditingController();
   TextEditingController lnameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
   TextEditingController contactNoController = TextEditingController();
   TextEditingController departmentController = TextEditingController();
 
@@ -98,6 +97,33 @@ class _AccountSettingsState extends State<AccountSettings> {
     setState(() {
       
     });
+  }
+
+  Future<void> updateAccount() async {
+    String? teacherId;
+    try {
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error loading user info: $error");
+    }
+     print('nara name: ${fnameController.text}');
+    final response = await http.put(Uri.parse(Api.updateAccount), 
+    body:{
+      'teacher_id': teacherId,
+      'first_name': fnameController.text,
+      'last_name': lnameController.text,
+      'email': emailController.text,
+      'phone_number': contactNoController.text,
+      'department': departmentController.text
+    });
+
+    if (response.statusCode == 200) {
+      print("naka connect sa backend");
+      print(response.body);
+    }
+
   }
 
   @override
@@ -228,6 +254,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                     ElevatedButton(
                       onPressed: () {
                         retrieveImage();
+                        updateAccount();
                       },
                       style: ButtonStyle(
                         minimumSize: MaterialStateProperty.all<Size>(

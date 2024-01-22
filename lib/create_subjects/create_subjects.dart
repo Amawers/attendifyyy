@@ -37,7 +37,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
           setState(() {
             converted = jsonDecode(response.body);
           });
-          print("Already converted from Json: $converted");
+          print("PANGITA SUBJECT TEACHER ID: $converted");
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text("No subjects")));
@@ -54,18 +54,21 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
   @override
   Widget build(BuildContext context) {
     var backgroundColors = [
+      0xFF081631,
       0xFF00315D,
-      0xFFA4C9FE,
     ];
     return Scaffold(
       appBar: AppBar(
-        title: const Text("About App", style: TextStyle(color:  Color(0xFF081631) )), 
-        leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const BottomNavBar()))
-            ),
         backgroundColor: Colors.white,
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF081631)),
+            onPressed: () => Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const BottomNavBar()))),
+        title: const Text(
+          'Subject List',
+          style:
+              TextStyle(color: Color(0xFF081631), fontWeight: FontWeight.bold),
+        ),
       ),
       body: (converted.isEmpty)
           ? const Center(child: Text('Empty'))
@@ -74,6 +77,8 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
               itemCount: converted.length,
               itemBuilder: (context, index) {
                 return ListOfSubjectsWidget(
+                  subject_teachers_id:
+                      converted[index]['subject_teachers_id'] ?? 'tesssst',
                   subject_name: converted[index]['subject_name'] ?? 'tesssst',
                   subject_code: converted[index]['subject_code'] ?? 'tesssst',
                   section_name: converted[index]['section_name'] ?? 'tesssst',
@@ -102,6 +107,7 @@ class _ListOfSubjectsState extends State<ListOfSubjects> {
 }
 
 class ListOfSubjectsWidget extends StatelessWidget {
+  String subject_teachers_id;
   String subject_name;
   String subject_code;
   String section_name;
@@ -110,6 +116,7 @@ class ListOfSubjectsWidget extends StatelessWidget {
   int backgroundColor;
 
   ListOfSubjectsWidget({
+    required this.subject_teachers_id,
     required this.subject_name,
     required this.subject_code,
     required this.section_name,
@@ -121,14 +128,14 @@ class ListOfSubjectsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin:
-            const EdgeInsets.only(bottom: 18.0), //spaces between subject cards
+        margin: const EdgeInsets.only(top: 18), //spaces between subject cards
         child: ElevatedButton(
             onPressed: () {
               showDialog(
                   context: context,
                   builder: (BuildContext context) => Dialog.fullscreen(
                       child: ListOfStudentsScreen(
+                          subject_teachers_id: subject_teachers_id,
                           section_id: section_id,
                           subject_code: subject_code,
                           subject_id: subject_id,
@@ -138,45 +145,382 @@ class ListOfSubjectsWidget extends StatelessWidget {
                 padding: MaterialStateProperty.all<EdgeInsets>(
                     const EdgeInsets.all(16.0)),
                 minimumSize:
-                    MaterialStateProperty.all<Size>(const Size.fromHeight(100)),
+                    MaterialStateProperty.all<Size>(const Size.fromHeight(120)),
                 backgroundColor:
                     MaterialStateProperty.all<Color>(Color(backgroundColor)),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.0),
                 ))),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(subject_name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.0,
-                    )),
-                const SizedBox(height: 10.0),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(subject_code,
-                          style: const TextStyle(
-                            color: Color(0xDAEAEAEA),
-                            fontSize: 20.0,
-                          )),
-                      Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6.0, horizontal: 14.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Text(section_name,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 5),
+              child: Column(
+                children: [
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(subject_name,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                              )))
-                    ]),
-              ],
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24.0,
+                              )),
+                        ),
+                        const SizedBox(width: 20),
+                        //POPUP PARAS EDIT AND DELETE
+                        PopupMenuButton(
+                            icon: const Icon(Icons.more_vert,
+                                color: Colors.white),
+                            itemBuilder: (context) {
+                              return [
+                                const PopupMenuItem<int>(
+                                  value: 0,
+                                  child: Row(children: [
+                                    Icon(Icons.edit,
+                                        size: 18.0, color: Color(0xFF081631)),
+                                    SizedBox(width: 5.0),
+                                    Text(
+                                      "Edit",
+                                      style: TextStyle(
+                                        color: Color(0xFF081631),
+                                      ),
+                                    )
+                                  ]),
+                                ),
+                                const PopupMenuItem<int>(
+                                  value: 1,
+                                  child: Row(children: [
+                                    Icon(
+                                      Icons.delete_forever,
+                                      size: 18.0,
+                                      color: Color(0xFF081631),
+                                    ),
+                                    SizedBox(width: 5.0),
+                                    Text(
+                                      "Delete",
+                                      style: TextStyle(
+                                        color: Color(0xFF081631),
+                                      ),
+                                    )
+                                  ]),
+                                ),
+                              ];
+                            },
+                            //DIALOG PARAS EDIT AND DELETE NGA DROPDOWN
+                            onSelected: (value) {
+                              if (value == 0) {
+                                print("Class Schedule update.");
+
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) => Dialog(
+                                        child: EditSubject(
+                                            subject_teachers_id:
+                                                subject_teachers_id,
+                                            subject_id: subject_id,
+                                            subject_name: subject_name,
+                                            subject_code: subject_code,
+                                            section_name: section_name)));
+                              } else if (value == 1) {
+                                print("Subject delete.");
+
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) => Dialog(
+                                            child: DeleteSubject(
+                                          subject_id: subject_id,
+                                          section_id: section_id,
+                                        )));
+                              }
+                            }),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(subject_code,
+                            style: const TextStyle(
+                              color: Color(0xDAEAEAEA),
+                              fontSize: 20.0,
+                            )),
+                        Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 6.0, horizontal: 14.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Text(section_name,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0,
+                                ))),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             )));
+  }
+}
+
+//FUNCTION OR METHOD PARAS EDIT NGA MENU
+class EditSubject extends StatefulWidget {
+  String? subject_id;
+  String? subject_name;
+  String? subject_code;
+  String? section_name;
+  String? subject_teachers_id;
+  EditSubject(
+      {required this.subject_id,
+      required this.subject_name,
+      required this.subject_code,
+      required this.section_name,
+      required this.subject_teachers_id});
+  @override
+  _EditSubject createState() => _EditSubject();
+}
+
+class _EditSubject extends State<EditSubject> {
+  List<dynamic> subjectData = [];
+
+  TextEditingController subjectNameController = TextEditingController();
+  TextEditingController subjectCodeController = TextEditingController();
+  TextEditingController sectionNameController = TextEditingController();
+  String semesterValue = semesterList.first;
+  final _subjectFormKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    getSubjectData();
+  }
+
+  Future<void> getSubjectData() async {
+    // // final response = await http.get(
+    // //     Uri.parse('${Api.getSubjectData}?subject_id=${widget.subject_id}'));
+    // // subjectData = jsonDecode(response.body);
+    // print("SUBJECT DATA NIYA: $subjectData");
+    subjectNameController.text = widget.subject_name!;
+    subjectCodeController.text = widget.subject_code!;
+    sectionNameController.text = widget.section_name!;
+  }
+
+  Future<void> editSubject() async {
+    final response = await http.put(Uri.parse(Api.updateSubjectData), body: {
+      'subject_teachers_id': widget.subject_teachers_id,
+      'subject_name': subjectNameController.text,
+      'subject_code': subjectCodeController.text,
+      'section_name': sectionNameController.text,
+      'semester': semesterValue
+    });
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print("nag error connect sa backend");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 400,
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          const Text('EDIT SUBJECT',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              )),
+          Form(
+              key: _subjectFormKey,
+              child: Column(children: [
+                const SizedBox(height: 14),
+                createTextField(subjectNameController, "Subject Name", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(subjectCodeController, "Subject Code", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  } else if (value.length > 10) {
+                    return "Character limit exceeded.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                createTextField(sectionNameController, "Section", (value) {
+                  if (value == null || value.isEmpty) {
+                    return "This field is required.";
+                  }
+                  return null;
+                }),
+                const SizedBox(height: 14),
+                DropdownButton<String>(
+                  isExpanded: true, //set width to 100%
+                  value: semesterValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  elevation: 16,
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      semesterValue = value!;
+                    });
+                  },
+                  items: semesterList
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20.0),
+                TextButton(
+                    onPressed: () {
+                      //validate textfields
+                      if (_subjectFormKey.currentState!.validate()) {
+                        //create subject in the database
+                        // EditSubject(
+                        //     subject_id: widget.subject_id,
+                        //     section_name: widget.section_name,
+                        //     subject_code: widget.subject_code,
+                        //     subject_name: widget.subject_name);
+                        editSubject();
+                        Navigator.of(context, rootNavigator: true)
+                            .pop(); //close dialog
+                      }
+                    },
+                    style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all<Size>(
+                          const Size.fromHeight(
+                              55)), //having height will make width 100%
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(
+                              vertical: 14.0, horizontal: 44.0)),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color(0xFF081631),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
+                    ),
+                    child: const Text("Edit",
+                        style: TextStyle(
+                            backgroundColor: Color(0xFF081631),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white))),
+              ]))
+        ],
+      ),
+    );
+  }
+}
+
+//FUNCTION OR METHOD PARAS DELETE MENU
+class DeleteSubject extends StatefulWidget {
+  String? subject_id;
+  String? section_id;
+  DeleteSubject({required this.subject_id, required this.section_id});
+
+  @override
+  State<DeleteSubject> createState() => _DeleteSubjectState();
+}
+
+class _DeleteSubjectState extends State<DeleteSubject> {
+  Future<void> deleteSubject() async {
+    final response = await http.delete(Uri.parse(Api.deleteSubject), body: {
+      'subject_id': widget.subject_id,
+      'section_id': widget.section_id
+    });
+    print(response.body);
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: Colors.white,
+      ),
+      height: 100,
+      width: 70,
+      margin: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Text(
+            "Are you sure?",
+            style: TextStyle(
+                color: Color(0xFF081631),
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 40),
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    deleteSubject();
+                  },
+                  icon: const Icon(
+                    Icons.check,
+                  ),
+                  label: const Text(
+                    'YES',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.cancel),
+                  label: const Text(
+                    'NO',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -233,8 +577,7 @@ class _CreateSubject extends State<CreateSubject> {
                 createTextField(subjectCodeController, "Subject Code", (value) {
                   if (value == null || value.isEmpty) {
                     return "This field is required.";
-                  }
-                  else if(value.length > 10) {
+                  } else if (value.length > 10) {
                     return "Character limit exceeded.";
                   }
                   return null;

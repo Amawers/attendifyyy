@@ -26,6 +26,7 @@ class _AboutAppState extends State<AboutApp> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 45),
             // Section: Icon and Title
             Container(
               margin: const EdgeInsets.only(top: 20),
