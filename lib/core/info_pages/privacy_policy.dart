@@ -24,17 +24,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,             
             children: [  
               Container(
-                width: 100,
-                height: 100,
+                width: 75,
+                height: 75,
                 decoration: const BoxDecoration(
-                  image: DecorationImage(image: NetworkImage('assets/images/privacy.png')
+                  image: DecorationImage(image: AssetImage('assets/images/privacy.png')
                   ),
                 ),
               ),
               const Text(
                 "Privacy Policy",
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 26,
                   color: Color.fromARGB(255, 0, 29, 53),
                   fontWeight: FontWeight.bold,
                 ),
@@ -54,47 +54,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.0),              
               color: Color.fromARGB(255, 235, 233, 233)),
             padding: const EdgeInsets.all(10.0),
-            child: const Column(
-              children: [
-                Text(
-                  "Thank you for choosing the QR Code Attendance Checker App. We are committed to safeguarding your privacy and ensuring the security of your personal information. This Privacy Policy outlines how we collect, use, disclose, and protect your data. By using our app, you consent to the practices described herein. ",
-                  style: TextStyle(fontSize: 14, color: Color.fromARGB(255, 0, 0, 0)),
-                  textAlign: TextAlign.justify,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    
-                    "Information We Collect:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color.fromARGB(255, 0, 0, 0),
-                    ),
-                    textAlign: TextAlign.justify,
-                  ),
-                ),
-                Text(
-                  "1.User Account Information: To use our app, you may be required to create an account. We collect information such as your name, email address, and password to set up and manage your account.",
-                  style: TextStyle(fontSize: 14, color: Color.fromARGB(255, 0, 0, 0)),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(
-                  "2.Attendance Data: Our app collects attendance records, which may include student names, dates, and times of attendance. This information is used solely for attendance tracking purposes.",
-                  style: TextStyle(fontSize: 14, color: Color.fromARGB(255, 0, 0, 0)),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(
-                  "3.Device Information: We may collect information about the device you use to access our app, including the device's unique identifier, operating system, and version.",
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(
-                  "4.Usage Data: We gather data on how you interact with our app, including your interactions with features and the frequency and duration of your app usage.",
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                  textAlign: TextAlign.justify,
-                ),
-              ],
+            child: const Text(
+              "Thank you for choosing the QR Code Attendance Checker App. We are committed to safeguarding your privacy and ensuring the security of your personal information. This Privacy Policy outlines how we collect, use, disclose, and protect your data. By using our app, you consent to the practices described herein. ",
+              style: TextStyle(fontSize: 14, color: Color.fromARGB(255, 0, 0, 0)),
+              textAlign: TextAlign.justify,
             ),
           ),
           const SizedBox(height: 12.0),
@@ -128,17 +91,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 14, color: Colors.white),
                   textAlign: TextAlign.justify,
                 ),
-                Text(
-                  "3. Account Management: Your account information is used to manage your app account and provide customer support.",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(
-                  "4. Communication: We may use your email address to send important updates, service-related announcements, and promotional information. You can opt out of promotional ",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                  textAlign: TextAlign.justify,
-                ),
-                
               ],
             ),
           ),
