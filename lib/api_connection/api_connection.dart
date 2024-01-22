@@ -23,4 +23,5 @@ class Api {
   static const deleteSubject = '$hostConnect/create_subject/delete_subject.php';
   static const getSubjectData = '$hostConnect/create_subject/subject_data.php';
   static const updateSubjectData = '$hostConnect/create_subject/update_subject.php';
+  static const updateSchedule = '$hostConnect/create_schedule/update_schedule.php';
 }

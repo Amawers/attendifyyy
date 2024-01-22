@@ -8,6 +8,11 @@ class RememberUserPreferences {
     await preferences.setString('currentTeacherId', userJsonData);
   }
 
+  // static Future<void> deleteUserInfo() async {
+  //   SharedPreferences preferences = await SharedPreferences.getInstance();
+  //   await preferences.remove('currentTeacherId');
+  // }
+
   static Future<Map<String, dynamic>?> readUserInfo() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? teacherInfo = preferences.getString('currentTeacherId');

@@ -28,8 +28,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Map<String, dynamic>? teacherInfo =
         await RememberUserPreferences.readUserInfo();
     setState(() {
-      teacherName = teacherInfo?['first_name'];
-      teacherId = teacherInfo?['teacher_id'];
+      teacherName = teacherInfo?['first_name'] ?? "";
+      teacherId = teacherInfo?['teacher_id'] ?? "";
     });
   }
 
