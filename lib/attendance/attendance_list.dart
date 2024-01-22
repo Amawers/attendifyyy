@@ -21,7 +21,9 @@ class AttendanceReport extends StatefulWidget {
 class _AttendanceReportState extends State<AttendanceReport> {
   List<dynamic> converted = [];
   List<String> subjects = [];
+  List<String> sections = [];
   String? selectedSubject;
+  String? selectedSectionName;
   //this is where the first or the original fetched studentAttendanceData will be stored
   List<dynamic> studentAttendanceDataOriginal = [];
   //this is the studentAttendanceData that going to be use for making student cards
@@ -47,16 +49,11 @@ class _AttendanceReportState extends State<AttendanceReport> {
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
           converted = jsonDecode(response.body);
-          print('get list: $converted');
+          print('VALUE OF CONVERTED: $converted');
           setState(() {
-            //get all string subjects as a list from converted
-            subjects = List<String>.from(converted
-                .map((dynamic subject) => subject['subject_name'].toString()));
-            //set selectedSubject with the first subject in subjects if it exist
-            selectedSubject = subjects.first;
-            if (selectedSubject != null) {
-              getAttendanceList();
-            }
+            selectedSubject = converted[0]['subject_name'];
+            selectedSectionName = converted[0]['section_name'];
+            getAttendanceList();
           });
         } else {
           ScaffoldMessenger.of(context)
@@ -78,22 +75,30 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
     String teacherId = teacherInfo?['teacher_id'];
 
-    final response = await http.post(Uri.parse(Api.listOfAttendance),
-        body: {'teacher_id': teacherId, 'subject_name': selectedSubject});
-    if (response.statusCode == 200) {
-      try {
-        studentAttendanceDataOriginal = jsonDecode(response.body);
-        studentAttendanceData =
-            studentAttendanceDataOriginal; //set the default value of studentAttendanceData
-        print(
-            "Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceDataOriginal ?? ""}");
-      } catch (error) {
-        print("no data lods");
-        studentAttendanceDataOriginal.clear();
+    try {
+      print('SELECTED SUBJECT ${selectedSubject}');
+      print('SELECTED SECTION ${selectedSectionName}');
+      final response = await http.post(Uri.parse(Api.listOfAttendance), body: {
+        'teacher_id': teacherId,
+        'subject_name': selectedSubject,
+        'section_name': selectedSectionName
+      });
+      if (response.statusCode == 200) {
+        try {
+          studentAttendanceDataOriginal = jsonDecode(response.body);
+          studentAttendanceData = studentAttendanceDataOriginal;
+          print(
+              "Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceDataOriginal ?? ""}");
+        } catch (error) {
+          print("No attendance data for specific teacher ug subject");
+          studentAttendanceDataOriginal.clear();
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
       }
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+    } catch (error) {
+      print("wala mi connect sa backend");
     }
     setState(() {});
   }
@@ -139,18 +144,29 @@ class _AttendanceReportState extends State<AttendanceReport> {
                         underline:
                             const SizedBox(), //make the dropdownbutton underline invisible
                         focusColor: Colors.transparent,
-                        items: subjects.map((String subjects) {
+                        items: converted
+                            .map<DropdownMenuItem<String>>((dynamic value) {
+                          String combinedValue =
+                              "${value['section_name']} - ${value['subject_name']}";
                           return DropdownMenuItem(
-                              value: subjects, child: Text(subjects));
+                              value: combinedValue, child: Text(combinedValue));
                         }).toList(),
                         onChanged: (String? newValue) {
+                          List<String> values =
+                              newValue!.split(RegExp(r'\s-\s'));
                           setState(() {
-                            selectedSubject = newValue;
+                            print("BEFORE E SPLIT $values");
+                            selectedSectionName = values[0];
+                            selectedSubject = values[1];
+                                                        getAttendanceList();
+
                           });
-                          if (selectedSubject != null) {
-                            getAttendanceList();
-                          }
+                          // if (selectedSectionId != null &&
+                          //     selectedSubject != null) {
+                          //   getAttendanceList();
+                          // }
                         },
+
                         //hide default arrow_downward icon
                         icon: const Visibility(
                             visible: false, child: Icon(Icons.arrow_downward)),
@@ -161,13 +177,15 @@ class _AttendanceReportState extends State<AttendanceReport> {
                           child: Row(
                             children: [
                               //flexible allows text child to adjust
-                              Flexible(child: Text(selectedSubject ?? 'Select a schedule',
-                                  style: const TextStyle(
-                                      //with overflow it hide or turn the overflowed text into ellipsis
-                                      overflow: TextOverflow.ellipsis,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF081631)))),
+                              Flexible(
+                                  child: Text(
+                                      selectedSubject ?? 'Select a schedule',
+                                      style: const TextStyle(
+                                          //with overflow it hide or turn the overflowed text into ellipsis
+                                          overflow: TextOverflow.ellipsis,
+                                          fontSize: 20.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF081631)))),
                               const Icon(Icons.arrow_drop_down)
                             ],
                           ),
