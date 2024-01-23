@@ -3,7 +3,7 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/attendance/attendance_list.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/create_schedules/create_schedule.dart';
-import 'package:attendifyyy/create_students/create_students.dart';
+import 'package:attendifyyy/students/create_student.dart';
 import 'package:attendifyyy/create_subjects/create_subjects.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;

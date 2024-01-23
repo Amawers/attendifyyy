@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
-import 'package:attendifyyy/create_students/create_students.dart';
+import 'package:attendifyyy/students/create_student.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
