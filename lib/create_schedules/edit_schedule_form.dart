@@ -211,7 +211,7 @@ class _EditScheduleState extends State<EditSchedule> {
                   items: dayOfWeekList
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem(
-                        value: value, child: Text(value));
+                        value: value, child: Text("$value"));
                   }).toList(),
                   onChanged: (String? value) {
                     // This is called when the user selects an item.
