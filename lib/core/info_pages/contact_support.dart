@@ -82,17 +82,6 @@ class _ContactSupportState extends State<ContactSupport> {
                 ),
                 Text(''),
                 Text(
-                  "Feedback:",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(
-                  "We welcome your feedback and suggestions on how we can imporove our app and services. Your input is valuable to us and helps us enhance your experience with the QR Code Attendnce Checker App. Please send your feedback to:",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                  textAlign: TextAlign.justify,
-                ),
-                Text(''),
-                Text(
                   "[Attendify@gmail.com].",
                   style: TextStyle(fontSize: 20, color: Colors.white),
                   textAlign: TextAlign.justify,

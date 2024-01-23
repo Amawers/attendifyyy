@@ -15,6 +15,7 @@ class LogIn extends StatefulWidget {
   _LogInState createState() => _LogInState();
 }
 
+// DOUBLESSSSS
 class _LogInState extends State<LogIn> {
   bool obscurePassword = true;
 
@@ -24,7 +25,10 @@ class _LogInState extends State<LogIn> {
   final _formKey = GlobalKey<FormState>();
 
   String _response = "";
-
+  String? email;
+  String? pass;
+  var resBodyOfLogin;
+  Map<String, dynamic>? teacherInfo;
 
   //first load
   @override
@@ -33,10 +37,9 @@ class _LogInState extends State<LogIn> {
     fillInLoginCredentials();
   }
 
-
   //in first page load if there is an existing credentials stored in local storage
   //occupy the email and password controller with those values
-  Future<void> fillInLoginCredentials() async {
+ Future<void> fillInLoginCredentials() async {
     final SharedPreferences _prefs = await SharedPreferences.getInstance();
 
       if(_prefs.getString('remember_email') != null &&
@@ -61,7 +64,7 @@ class _LogInState extends State<LogIn> {
     );
 
     if (response.statusCode == 200) {
-      var resBodyOfLogin = jsonDecode(response.body);
+      resBodyOfLogin = jsonDecode(response.body);
       if (resBodyOfLogin['success'] == true) {
         Navigator.pushReplacement(
           context,
@@ -87,6 +90,8 @@ class _LogInState extends State<LogIn> {
     * this is for remembering credentials
     *
     * */
+
+    //remember credentials if remember me checkbox is checked
     final SharedPreferences _prefs = await SharedPreferences.getInstance();
 
     //remember credentials if remember me checkbox is checked
@@ -196,7 +201,11 @@ class _LogInState extends State<LogIn> {
                           rememberMe = !rememberMe;
                         });
                       }),
-                  const Text("Remember Me", style: TextStyle(color: Color(0xFF081631), fontSize: 13.0, fontWeight: FontWeight.bold))
+                  const Text("Remember Me",
+                      style: TextStyle(
+                          color: Color(0xFF081631),
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold))
                 ],
               ),
               const SizedBox(height: 40),

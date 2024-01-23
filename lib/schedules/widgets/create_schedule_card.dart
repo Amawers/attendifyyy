@@ -114,8 +114,8 @@ class ClassScheduleCard extends StatelessWidget {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) =>
-                                  const Dialog(
-                                      child: EditSchedule()));
+                                  Dialog(
+                                      child: EditSchedule(schedule_id: schedule_id, start_time: start_time, end_time: end_time, day_of_week: day_of_week)));
                             }
                             //1 is the delete menu item
                             else if (value == 1) {

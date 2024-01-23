@@ -18,11 +18,13 @@ class ListOfStudentsScreen extends StatefulWidget {
   String? subject_code;
   String? section_id;
   String? subject_id;
+  String? subject_teachers_id;
   ListOfStudentsScreen(
       {required this.subject_name,
       required this.subject_code,
       required this.section_id,
-      required this.subject_id});
+      required this.subject_id,
+      required this.subject_teachers_id});
 
   @override
   State<ListOfStudentsScreen> createState() => _ListOfStudentsScreenState();
@@ -102,25 +104,28 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                   .spaceBetween, // Aligns children to the start and end of the row
               children: [
                 //text para sa subject name ug subject code
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${widget.subject_name}',
-                      style: const TextStyle(
-                        color: Color(0xff081631),
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${widget.subject_name}',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xff081631),
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${widget.subject_code}',
-                      style: const TextStyle(
-                        color: Color(0xff081631),
-                        fontSize: 15,
+                      Text(
+                        '${widget.subject_code}',
+                        style: const TextStyle(
+                          color: Color(0xff081631),
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 //button para edit
                 Ink(
@@ -176,11 +181,16 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                                                   context: context,
                                                   builder: (BuildContext
                                                           context) =>
-                                                      const Dialog(
-                                                          child:
-                                                              DeleteStudent()));
+                                                      Dialog(
+                                                          child: DeleteStudent(
+                                                              student_id: studentList[
+                                                                          index]
+                                                                      [
+                                                                      'student_id'] ??
+                                                                  'No fname')));
                                             },
-                                            child: const Icon(Icons.delete_forever,
+                                            child: const Icon(
+                                                Icons.delete_forever,
                                                 color: Colors.white))),
                                     const SizedBox(width: 10),
                                     Container(
@@ -194,9 +204,11 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                                                           context) =>
                                                       Dialog(
                                                           child: EditStudent(
-                                                        subject_id: '',
-                                                        section_id: '',
-                                                      )));
+                                                              student_id: studentList[
+                                                                          index]
+                                                                      [
+                                                                      'student_id'] ??
+                                                                  'No fname')));
                                             },
                                             child: const Icon(Icons.edit,
                                                 color: Colors.white)))
@@ -457,15 +469,15 @@ class _CreateStudentState extends State<CreateStudent> {
 }
 
 class EditStudent extends StatefulWidget {
-  String? section_id;
-  String? subject_id;
-  EditStudent({required this.section_id, required this.subject_id});
-
+  String? student_id;
+  EditStudent({required this.student_id});
   @override
   State<EditStudent> createState() => _EditStudentState();
 }
 
 class _EditStudentState extends State<EditStudent> {
+  List<dynamic> studentData = [];
+
   TextEditingController referenceNumberController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController middleInitialController = TextEditingController();
@@ -478,10 +490,27 @@ class _EditStudentState extends State<EditStudent> {
   @override
   void initState() {
     super.initState();
+    getStudentData();
+  }
+
+  Future<void> getStudentData() async {
+    final response = await http.get(
+        Uri.parse('${Api.getStudentData}?student_id=${widget.student_id}'));
+
+    studentData = jsonDecode(response.body);
+    print("Student's data: $studentData");
+    firstNameController.text = studentData[0]['first_name'];
+    middleInitialController.text = studentData[0]['middle_initial'];
+    lastNameController.text = studentData[0]['last_name'];
+    emailController.text = studentData[0]['email'];
+    referenceNumberController.text = studentData[0]['reference_number'];
+    courseController.text = studentData[0]['course'];
+    gradeLevelValue = studentData[0]['grade_level'];
   }
 
   Future<void> editStudent() async {
-    final response = await http.post(Uri.parse(Api.createStudent), body: {
+    final response = await http.put(Uri.parse(Api.updateStudentData), body: {
+      'student_id': widget.student_id,
       'reference_number': referenceNumberController.text,
       'first_name': firstNameController.text,
       'middle_initial': middleInitialController.text,
@@ -489,8 +518,6 @@ class _EditStudentState extends State<EditStudent> {
       'email': emailController.text,
       'course': courseController.text,
       'grade_level': gradeLevelValue,
-      'section_id': widget.section_id,
-      'subject_id': widget.subject_id
     });
 
     if (response.statusCode == 200) {
@@ -633,13 +660,21 @@ class _EditStudentState extends State<EditStudent> {
 
 //FUNCTION OR METHOD PARAS DELETE MENU SA STUDENT
 class DeleteStudent extends StatefulWidget {
-  const DeleteStudent({super.key});
+  String? student_id;
+  DeleteStudent({required this.student_id});
 
   @override
   State<DeleteStudent> createState() => _DeleteStudentState();
 }
 
 class _DeleteStudentState extends State<DeleteStudent> {
+  Future<void> deleteStudent() async {
+    final response = await http.delete(
+        Uri.parse('${Api.deleteStudent}?student_id=${widget.student_id}'));
+    print(response.body);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -660,44 +695,53 @@ class _DeleteStudentState extends State<DeleteStudent> {
                 fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.check,
-                ),
-                label: const Text(
-                  'YES',
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF081631), // Background color of the button
-                  onPrimary: Colors.white, // Text color on the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Set border radius
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    deleteStudent();
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.check,
                   ),
-                  elevation: 4.0, // Set elevation
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.cancel),
-                label: const Text(
-                  'NO',
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF081631), // Background color of the button
-                  onPrimary: Colors.white, // Text color on the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Set border radius
+                  label: const Text(
+                    'YES',
                   ),
-                  elevation: 4.0, // Set elevation
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
                 ),
-              ),
-            ],
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.cancel),
+                  label: const Text(
+                    'NO',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Color(0xFF081631), // Background color of the button
+                    onPrimary: Colors.white, // Text color on the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Set border radius
+                    ),
+                    elevation: 4.0, // Set elevation
+                  ),
+                ),
+              ],
+            ),
           )
         ],
       ),
