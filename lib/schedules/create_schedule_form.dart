@@ -4,7 +4,7 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:http/http.dart' as http;
 
-
+//this is list of options for dayOfWeek dropdown button
 List<String> dayOfWeekList = [
   "Monday",
   "Tuesday",
@@ -16,14 +16,14 @@ List<String> dayOfWeekList = [
 ];
 
 
-class EditSchedule extends StatefulWidget {
-  const EditSchedule({super.key});
+class CreateSchedule extends StatefulWidget {
+  const CreateSchedule({super.key});
 
   @override
-  State<EditSchedule> createState() => _EditScheduleState();
+  State<CreateSchedule> createState() => _CreateScheduleState();
 }
 
-class _EditScheduleState extends State<EditSchedule> {
+class _CreateScheduleState extends State<CreateSchedule> {
   final _subjectFormKey = GlobalKey<FormState>();
   String? _subjectNameValue;
   String? _sectionNameValue;
@@ -52,7 +52,6 @@ class _EditScheduleState extends State<EditSchedule> {
           setState(() {
             converted = jsonDecode(response.body);
           });
-          // print("KANI SIYAAAA: ${converted[index]['subject_name']}");
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text("No subjects")));
@@ -67,8 +66,30 @@ class _EditScheduleState extends State<EditSchedule> {
   }
 
   //post newly created schedule to the database
-  // Future<void> editSchedule() async {
-  // }
+  Future<void> createSchedule() async {
+    Map<String, dynamic>? teacherInfo =
+    await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    print("Sulod sa start time: $startTime");
+    print('subject name sa FUNCTION $_subjectNameValue');
+    print('section name sa FUNCTION $_sectionNameValue');
+
+    final response = await http.post(Uri.parse(Api.createSchedule), body: {
+      'teacher_id': teacherId,
+      'subject_name': _subjectNameValue,
+      'section_name': _sectionNameValue,
+      'start_time':
+      "$startTime.", //I wrap it with double quote to convert it into string
+      'end_time': "$endTime",
+      'days_of_week': _dayWeekValue
+    });
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('${response.body}')));
+
+    print(response.body);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +98,7 @@ class _EditScheduleState extends State<EditSchedule> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          const Text('EDIT SCHEDULE',
+          const Text('CREATE SCHEDULE',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16.0,
@@ -101,18 +122,15 @@ class _EditScheduleState extends State<EditSchedule> {
                   decoration: InputDecoration(
                     labelText: "Subject",
                     contentPadding: const EdgeInsets.all(16.0),
-                    //border style when its focus
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
                         BorderSide(width: 2, color: Color(0xFF081631))),
-                    //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
                   items:
                   converted.map<DropdownMenuItem<String>>((dynamic value) {
@@ -239,12 +257,11 @@ class _EditScheduleState extends State<EditSchedule> {
                     ),
                   ),
                   isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
                   items: dayOfWeekList
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem(
-                        value: value, child: Text("$value"));
+                        value: value, child: Text(value));
                   }).toList(),
                   onChanged: (String? value) {
                     // This is called when the user selects an item.
@@ -265,7 +282,7 @@ class _EditScheduleState extends State<EditSchedule> {
                       //validate input fields
                       if (_subjectFormKey.currentState!.validate()) {
                         print("submitted");
-                        //editSchedule();
+                        createSchedule();
                       }
                     },
                     style: ButtonStyle(
@@ -283,7 +300,7 @@ class _EditScheduleState extends State<EditSchedule> {
                             borderRadius: BorderRadius.circular(10.0),
                           )),
                     ),
-                    child: const Text("Edit",
+                    child: const Text("Create",
                         style: TextStyle(
                             backgroundColor: Color(0xFF081631),
                             fontSize: 16,

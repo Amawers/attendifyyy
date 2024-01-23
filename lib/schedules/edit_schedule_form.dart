@@ -16,14 +16,14 @@ List<String> dayOfWeekList = [
 ];
 
 
-class CreateSchedule extends StatefulWidget {
-  const CreateSchedule({super.key});
+class EditSchedule extends StatefulWidget {
+  const EditSchedule({super.key});
 
   @override
-  State<CreateSchedule> createState() => _CreateScheduleState();
+  State<EditSchedule> createState() => _EditScheduleState();
 }
 
-class _CreateScheduleState extends State<CreateSchedule> {
+class _EditScheduleState extends State<EditSchedule> {
   final _subjectFormKey = GlobalKey<FormState>();
   String? _subjectNameValue;
   String? _sectionNameValue;
@@ -67,30 +67,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
   }
 
   //post newly created schedule to the database
-  Future<void> createSchedule() async {
-    Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
-
-    String teacherId = teacherInfo?['teacher_id'];
-
-    print("Sulod sa start time: ${startTime}");
-    print('subject name sa FUNCTION $_subjectNameValue');
-    print('section name sa FUNCTION $_sectionNameValue');
-
-    final response = await http.post(Uri.parse(Api.createSchedule), body: {
-      'teacher_id': teacherId,
-      'subject_name': _subjectNameValue,
-      'section_name': _sectionNameValue,
-      'start_time':
-      "$startTime.", //I wrap it with double quote to convert it into string
-      'end_time': "$endTime",
-      'days_of_week': _dayWeekValue
-    });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${response.body}')));
-
-    print(response.body);
-  }
+  // Future<void> editSchedule() async {
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +77,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          const Text('CREATE SCHEDULE',
+          const Text('EDIT SCHEDULE',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16.0,
@@ -266,7 +244,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   items: dayOfWeekList
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem(
-                        value: value, child: Text("$value"));
+                        value: value, child: Text(value));
                   }).toList(),
                   onChanged: (String? value) {
                     // This is called when the user selects an item.
@@ -287,7 +265,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                       //validate input fields
                       if (_subjectFormKey.currentState!.validate()) {
                         print("submitted");
-                        createSchedule();
+                        //editSchedule();
                       }
                     },
                     style: ButtonStyle(
@@ -305,7 +283,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                             borderRadius: BorderRadius.circular(10.0),
                           )),
                     ),
-                    child: const Text("Create",
+                    child: const Text("Edit",
                         style: TextStyle(
                             backgroundColor: Color(0xFF081631),
                             fontSize: 16,
