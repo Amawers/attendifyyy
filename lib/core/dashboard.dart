@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/attendance/attendance_list.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/create_schedules/create_schedule.dart';
 import 'package:attendifyyy/create_students/create_students.dart';
 import 'package:attendifyyy/create_subjects/create_subjects.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
+String currentDate = DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -17,11 +22,93 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic> converted = {};
   String teacherName = '';
   String teacherId = '';
+  String? imagePath;
+  List<dynamic> recentAttendanceList = [];
 
   @override
   void initState() {
     super.initState();
     getTeacherName();
+    retrieveImage();
+    getRecentAttendance();
+  }
+
+  String getGreeting() {
+    var now = TimeOfDay.now();
+    if (now.hour < 12) {
+      return 'Morning';
+    } else if (now.hour < 17) {
+      return 'Afternoon';
+    } else {
+      return 'Evening';
+    }
+  }
+
+  Future<void> getRecentAttendance() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    try {
+      final response = await http.get(Uri.parse('${Api.getRecentAttendance}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        try {
+          recentAttendanceList = jsonDecode(response.body);
+          print("SULOD SA recentAttendanceList: $recentAttendanceList");
+          print("TAN AWON VALUE: ${recentAttendanceList[0]['first_name']}");
+        } catch (error) {
+          print("WAY SULOD recentAttendanceList");
+        }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
+      }
+    } catch (error) {
+      print("wala mi connect sa backend");
+    }
+  }
+
+  Future<void> retrieveImage() async {
+    String? teacherId;
+    try {
+      // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
+      Map<String, dynamic>? teacherInfo =
+          await RememberUserPreferences.readUserInfo();
+      teacherId = teacherInfo?['teacher_id'];
+    } catch (error) {
+      print("Error loading user info: $error");
+    }
+
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.retrieveImage}?teacher_id=$teacherId'));
+
+      // Check if the response status code is OK (200)
+      if (response.statusCode == 200) {
+        // Decode the JSON response body
+        Map<String, dynamic> responseBody = json.decode(response.body);
+
+        // Check the 'status' field in the response
+        if (responseBody['status'] == 1) {
+          // Assuming the image path is stored in the 'image_path' field
+          imagePath = responseBody['image_path'];
+
+          // Do something with the imagePath, e.g., display the image
+          print("Image Path: $imagePath");
+        } else {
+          // Handle the case where the status is not 1
+          print("Failed to retrieve image path: ${responseBody['status']}");
+        }
+      } else {
+        // Handle non-OK status codes
+        print("Failed to retrieve image. Status code: ${response.statusCode}");
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print("Error during image retrieval: $error");
+    }
+    setState(() {});
   }
 
   Future<void> getTeacherName() async {
@@ -35,6 +122,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String greeting = getGreeting();
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(55),
@@ -62,16 +151,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Morning, $teacherName',
+                    '$greeting, $teacherName',
                     style: const TextStyle(
                       color: Color(0xff081631),
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
-                  const Text(
-                    'Monday, 9 Nov 2023',
-                    style: TextStyle(
+                  Text(
+                    currentDate,
+                    style: const TextStyle(
                       color: Color(0xff081631),
                       fontSize: 13,
                     ),
@@ -80,11 +169,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               Container(
                   margin: const EdgeInsets.only(right: 10.0),
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    minRadius: 15,
-                    maxRadius: 25,
-                  )),
+                  child: CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      minRadius: 15,
+                      maxRadius: 25,
+                      backgroundImage: imagePath != null
+                          ? Image.network(
+                                  'http://192.168.1.11/attendifyyy_backend/$imagePath')
+                              .image
+                          : Image.asset('assets/images/logo.png').image)),
             ],
           ),
           const SizedBox(height: 15),
@@ -108,12 +201,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           fontWeight: FontWeight.bold,
                           fontSize: 24.0),
                     ),
-                    Text(
-                      'See All',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    )
                   ],
                 ),
                 const SizedBox(
@@ -125,10 +212,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     /* stats cards */
                     createStatsCard(Icons.playlist_add_check_outlined,
-                        0xFF039000, "PRESENT", 69),
-                    createStatsCard(Icons.person_off, 0xFFFF0000, "ABSENT", 7),
+                        0xFF039000, "PRESENT", recentAttendanceList.length),
+                    createStatsCard(Icons.person_off, 0xFFFF0000, "ABSENT", 0),
                     createStatsCard(
-                        Icons.timer_off_rounded, 0xFFFF9900, "LATE", 4),
+                        Icons.timer_off_rounded, 0xFFFF9900, "LATE", 0),
                   ],
                 )
               ],
@@ -162,25 +249,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     color: Color(0xFF081631),
                     fontWeight: FontWeight.bold,
-                    fontSize: 24.0,
+                    fontSize: 18.0,
                   )),
               const SizedBox(height: 14.0),
               //student card list
-              Column(
-                //student cards
-                children: [
-                  createStudentCard("LATE", "Christian Dacoroon", "9:00 AM"),
-                  const SizedBox(height: 10.0),
-                  createStudentCard(
-                      "PRESENT", "Verseler kerr Handuman", "7:30 AM"),
-                  const SizedBox(height: 10.0),
-                  createStudentCard(
-                      "PRESENT", "Verseler kerr Handuman", "7:30 AM"),
-                  const SizedBox(height: 10.0),
-                  createStudentCard(
-                      "PRESENT", "Verseler kerr Handuman", "7:30 AM"),
-                ],
-              )
+              recentAttendanceList.isNotEmpty ? createStudentCard(recentAttendanceList[0]['attendance_status'] ?? "", '${recentAttendanceList[0]['first_name']}\n${recentAttendanceList[0]['last_name']}' ?? "", recentAttendanceList[0]['attendance_time'] ?? "") : createStudentCard("No data", "No data", "No data"),
             ],
           ),
         ],
@@ -199,7 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 Widget createStatsCard(
     IconData materialIcon, int backgroundColor, String label, int count) {
   return Container(
-    width: 100.0,
+    width: 90.0,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(14.0),
       //background color of stats card
@@ -257,11 +330,11 @@ Widget createListPageNavButton(
           color: Colors.white,
           size: 35.0,
         ),
-        SizedBox(
+        const SizedBox(
           width: 10,
         ),
         Text(label,
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16.0))
@@ -278,19 +351,19 @@ Widget createStudentCard(status, name, timeIn) {
 
   //set status icon
   switch (status) {
-    case "PRESENT":
+    case "Present":
       {
         _iconColor = 0xFF039000;
         _materialIcon = Icons.playlist_add_check_outlined;
       }
       break;
-    case "LATE":
+    case "Late":
       {
         _iconColor = 0xFFFF9900;
         _materialIcon = Icons.timer_off_rounded;
       }
       break;
-    case "ABSENT":
+    case "Absent":
     default:
       {
         _iconColor = 0xFFFF9900;
@@ -317,7 +390,7 @@ Widget createStudentCard(status, name, timeIn) {
             Container(
               margin: const EdgeInsets.only(
                   right: 7), //margin between avatar and name
-              child: Icon(
+              child: const Icon(
                 Icons.account_circle,
                 size: 50,
                 color: Colors.blueAccent,
@@ -327,7 +400,7 @@ Widget createStudentCard(status, name, timeIn) {
             //This is used to contain the student name
             Text(
               name,
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.black,
                   fontSize: 14,
                   fontWeight: FontWeight.bold),
