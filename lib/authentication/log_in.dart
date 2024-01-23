@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/sign_up.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
@@ -15,17 +15,46 @@ class LogIn extends StatefulWidget {
   _LogInState createState() => _LogInState();
 }
 
+// DOUBLESSSSS
 class _LogInState extends State<LogIn> {
   bool obscurePassword = true;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
+  var rememberMe = false;
   final _formKey = GlobalKey<FormState>();
 
   String _response = "";
+  String? email;
+  String? pass;
+  var resBodyOfLogin;
+  Map<String, dynamic>? teacherInfo;
 
+  //first load
+  @override
+  void initState() {
+    super.initState();
+    fillInLoginCredentials();
+  }
+
+  //in first page load if there is an existing credentials stored in local storage
+  //occupy the email and password controller with those values
+ Future<void> fillInLoginCredentials() async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+      if(_prefs.getString('remember_email') != null &&
+          _prefs.getString('remember_pass') != null) {
+        setState(() {
+        emailController.text = _prefs.getString('remember_email')!;
+        passwordController.text = _prefs.getString('remember_pass')!;
+        rememberMe = true;
+        });
+      }
+  }
+
+  //post credential to database
   Future<void> postSignUp() async {
+    //this is for post
     final response = await http.post(
       Uri.parse(Api.logIn),
       body: {
@@ -35,7 +64,7 @@ class _LogInState extends State<LogIn> {
     );
 
     if (response.statusCode == 200) {
-      var resBodyOfLogin = jsonDecode(response.body);
+      resBodyOfLogin = jsonDecode(response.body);
       if (resBodyOfLogin['success'] == true) {
         Navigator.pushReplacement(
           context,
@@ -54,6 +83,35 @@ class _LogInState extends State<LogIn> {
       setState(() {
         _response = 'Not connected to backend or no response';
       });
+    }
+
+    /*
+    *
+    * this is for remembering credentials
+    *
+    * */
+
+    //remember credentials if remember me checkbox is checked
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+    //remember credentials if remember me checkbox is checked
+    if (rememberMe) {
+      //check if remember credentials not exist in local storage
+      if (_prefs.getString('remember_email') == null &&
+          _prefs.getString('remember_pass') == null) {
+        //if not exist, store credentials to local
+        await _prefs.setString('remember_email', emailController.text);
+        await _prefs.setString('remember_pass', passwordController.text);
+      }
+    }
+    //if remember me checkbox is unchecked, remove the local stored credentials
+    else if (!rememberMe) {
+      if (_prefs.getString('remember_email') != null &&
+          _prefs.getString('remember_pass') != null) {
+        //if not exist, store credentials to local
+        await _prefs.remove('remember_email');
+        await _prefs.remove('remember_pass');
+      }
     }
   }
 
@@ -131,6 +189,24 @@ class _LogInState extends State<LogIn> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 7),
+              Row(
+                children: [
+                  Checkbox(
+                      value: rememberMe,
+                      activeColor: const Color(0xFF081631),
+                      onChanged: (value) {
+                        setState(() {
+                          rememberMe = !rememberMe;
+                        });
+                      }),
+                  const Text("Remember Me",
+                      style: TextStyle(
+                          color: Color(0xFF081631),
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold))
+                ],
               ),
               const SizedBox(height: 40),
               ElevatedButton(

@@ -2,7 +2,6 @@
 import 'package:attendifyyy/authentication/sign_up.dart';
 import 'package:attendifyyy/core/dashboard.dart';
 import 'package:flutter/material.dart';
-
 void main() {
   runApp(MyApp());
 }
@@ -10,6 +9,9 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: SignUp(), debugShowCheckedModeBanner: false);
+    return MaterialApp(
+      home: SignUp(),
+      debugShowCheckedModeBanner: false
+    );
   }
 }

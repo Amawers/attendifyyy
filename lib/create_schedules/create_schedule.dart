@@ -4,17 +4,8 @@ import 'package:attendifyyy/authentication/user_preferences/user_preferences.dar
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-// List<int> dayOfWeekList = [1, 2, 3, 4, 5, 6, 7];
-List<String> dayOfWeekList = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday"
-];
+import 'package:attendifyyy/create_schedules/create_schedule_form.dart';
+import 'package:attendifyyy/create_schedules/edit_schedule_form.dart';
 
 class ListOfSchedules extends StatefulWidget {
   const ListOfSchedules({super.key});
@@ -183,12 +174,15 @@ class ClassScheduleCard extends StatelessWidget {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(subject_name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          )),
+                      Flexible(
+                        child: Text(subject_name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                            )),
+                      ),
                       PopupMenuButton(
                           icon:
                               const Icon(Icons.more_vert, color: Colors.white),
@@ -199,7 +193,7 @@ class ClassScheduleCard extends StatelessWidget {
                                 child: Row(children: [
                                   Icon(Icons.edit, size: 18.0),
                                   SizedBox(width: 5.0),
-                                  Text("Edit")
+                                  Text("Edit"),
                                 ]),
                               ),
                               const PopupMenuItem<int>(
@@ -214,7 +208,10 @@ class ClassScheduleCard extends StatelessWidget {
                           },
                           onSelected: (value) {
                             if (value == 0) {
-                              print("Class Schedule update.");
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      Dialog(child: EditSchedule(schedule_id: schedule_id, start_time: start_time, end_time: end_time, day_of_week: day_of_week)));
                             } else if (value == 1) {
                               // print("Class Schedule delete.");
                               deleteSchedule(schedule_id);
@@ -276,315 +273,3 @@ class ClassScheduleCard extends StatelessWidget {
         ));
   }
 }
-
-/*
-*
-* Using for creating the schedule dialog content
-*
-* */
-class CreateSchedule extends StatefulWidget {
-  const CreateSchedule({super.key});
-
-  @override
-  State<CreateSchedule> createState() => _CreateScheduleState();
-}
-
-class _CreateScheduleState extends State<CreateSchedule> {
-  final _subjectFormKey = GlobalKey<FormState>();
-  TextEditingController subjectNameController = TextEditingController();
-  TextEditingController sectionNameController = TextEditingController();
-  //TextEditingController startTimeController = TextEditingController();
-  //TextEditingController endTimeController = TextEditingController();
-  TimeOfDay startTime = TimeOfDay.now();
-  TimeOfDay endTime = TimeOfDay.now();
-  // int dayWeekValue = dayOfWeekList.first;
-  String? dayWeekValue;
-
-  //post newly created schedule to the database
-  Future<void> createSchedule() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-
-    String teacherId = teacherInfo?['teacher_id'];
-
-    print("Sulod sa start time: ${startTime}");
-
-    final response = await http.post(Uri.parse(Api.createSchedule), body: {
-      'teacher_id': teacherId,
-      'subject_name': subjectNameController.text,
-      'section_name': sectionNameController.text,
-      'start_time':
-          "$startTime.", //I wrap it with double quote to convert it into string
-      'end_time': "$endTime",
-      'days_of_week': "$dayWeekValue"
-    });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${response.body}')));
-
-    print(response.body);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 480,
-      padding: const EdgeInsets.all(24.0),
-      child: ListView(
-        children: [
-          const Text('CREATE SCHEDULE',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.0,
-              )),
-          Form(
-              key: _subjectFormKey,
-              child: Column(children: [
-                const SizedBox(height: 20),
-                /*
-                *
-                * Input Text field for subject name
-                *
-                * */
-                createTextFormField("Subject Name", subjectNameController,
-                    (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  }
-                  return null;
-                }),
-                const SizedBox(height: 20),
-                /*
-                *
-                * Input Text field for section
-                *
-                * */
-                createTextFormField("Section", sectionNameController, (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  }
-                  return null;
-                }),
-                const SizedBox(height: 20),
-                /*
-                *
-                * Time picker for start time
-                *
-                * */
-                OutlinedButton(
-                    style: ButtonStyle(
-                        padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(
-                                vertical: 20.0, horizontal: 14.0)),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        )),
-                    onPressed: () async {
-                      final TimeOfDay? timeOfDay = await showTimePicker(
-                        context: context,
-                        initialTime: startTime,
-                        initialEntryMode: TimePickerEntryMode.dial,
-                      );
-                      if (timeOfDay != null) {
-                        setState(() {
-                          startTime = timeOfDay;
-                        });
-                      }
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(children: [
-                          const Text("Start Time:  ",
-                              style: TextStyle(color: Color(0xFF081631))),
-                          Text("${startTime.hour}:${startTime.minute}",
-                              style: const TextStyle(
-                                  color: Color(0xFF081631),
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.bold)),
-                        ]),
-                        const Icon(Icons.schedule, color: Color(0xFF081631))
-                      ],
-                    )),
-                const SizedBox(height: 20),
-                /*
-                *
-                * Time picker for end time
-                *
-                * */
-                OutlinedButton(
-                    style: ButtonStyle(
-                        padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(
-                                vertical: 20.0, horizontal: 14.0)),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        )),
-                    onPressed: () async {
-                      final TimeOfDay? timeOfDay = await showTimePicker(
-                        context: context,
-                        initialTime: endTime,
-                        initialEntryMode: TimePickerEntryMode.dial,
-                      );
-                      if (timeOfDay != null) {
-                        setState(() {
-                          endTime = timeOfDay;
-                        });
-                      }
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(children: [
-                          const Text("End Time:  ",
-                              style: TextStyle(color: Color(0xFF081631))),
-                          Text("${endTime.hour}:${endTime.minute}",
-                              style: const TextStyle(
-                                  color: Color(0xFF081631),
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.bold)),
-                        ]),
-                        const Icon(Icons.schedule, color: Color(0xFF081631))
-                      ],
-                    )),
-                const SizedBox(height: 20),
-                /*
-                *
-                * Dropdown field for day of the week
-                *
-                * */
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: "Days in a week",
-                    contentPadding: const EdgeInsets.all(16.0),
-                    //border style when its focus
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        borderSide:
-                            BorderSide(width: 2, color: Color(0xFF081631))),
-                    //border radius
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-
-                  // items: dayOfWeekList.map<DropdownMenuItem<int>>((int value) {
-                  //   return DropdownMenuItem<int>(
-                  //     value: value,
-                  //     child: Text("$value"),
-                  //   );
-                  // }).toList(),
-                  items: dayOfWeekList
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem(
-                        value: value, child: Text("$value"));
-                  }).toList(),
-                  onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      dayWeekValue = value!;
-                    });
-                  },
-                ),
-
-                //       DropdownButton(
-                //   items: subjects.map((String subjects) {
-                //     return DropdownMenuItem(value: subjects, child: Text(subjects));
-                //   }).toList(),
-                //   onChanged: (String? newValue) {
-                //     setState(() {
-                //       selectedSubject = newValue;
-                //     });
-                //     if (selectedSubject != null) {
-                //       getAttendanceList();
-                //     }
-                //   },
-                //   hint: Text(selectedSubject ?? 'Select a schedule'),
-                // ),
-                const SizedBox(height: 20),
-                /*
-                *
-                * submit button
-                *
-                * */
-                TextButton(
-                    onPressed: () {
-                      print("pressed");
-                      //validate input fields
-                      if (_subjectFormKey.currentState!.validate()) {
-                        print("submitted");
-                        createSchedule();
-                      }
-                    },
-                    style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all<Size>(
-                          const Size.fromHeight(
-                              55)), //having height will make width 100%
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 44.0)),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color(0xFF081631),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      )),
-                    ),
-                    child: const Text("Create",
-                        style: TextStyle(
-                            backgroundColor: Color(0xFF081631),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)))
-              ])),
-        ],
-      ),
-    );
-  }
-}
-
-/*
-*
-* TextFormField input components
-* This is for schedule and section
-*
-* */
-Widget createTextFormField(label, valueController, validationCondition) {
-  return TextFormField(
-      validator: validationCondition,
-      controller: valueController,
-      decoration: InputDecoration(
-        hintText: label,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14.0),
-        hintStyle: const TextStyle(
-            fontWeight: FontWeight.normal, color: Color(0xFFABABAB)),
-        focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
-        //normal state of textField border
-        enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(color: Color(0x8B081631))),
-        //border style when error
-        errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(color: Color(0xFFFF0000))),
-        focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
-      ));
-}
-
-/*
-*
-* time input components
-* this is for start and end time
-*
-* */

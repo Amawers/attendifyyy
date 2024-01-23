@@ -10,20 +10,18 @@ class ImageUpload extends StatelessWidget {
   late File _image;
 
   Future<void> _chooseImageFromCamera() async {
-    
-
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       String? teacherId;
-    try {
-      // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
-      Map<String, dynamic>? teacherInfo =
-          await RememberUserPreferences.readUserInfo();
-      teacherId = teacherInfo?['teacher_id'];
-    } catch (error) {
-      print("Error loading user info: $error");
-    }
+      try {
+        // Assuming RememberUserPreferences.readUserInfo() returns a Map<String, dynamic>
+        Map<String, dynamic>? teacherInfo =
+            await RememberUserPreferences.readUserInfo();
+        teacherId = teacherInfo?['teacher_id'];
+      } catch (error) {
+        print("Error loading user info: $error");
+      }
       _image = File(pickedFile.path);
       var isUploaded = await _uploadImage(teacherId!, _image);
       if (isUploaded) {
@@ -55,7 +53,10 @@ class ImageUpload extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch, 
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         ElevatedButton(
             onPressed: _chooseImageFromCamera, child: const Text("Camera")),
         ElevatedButton(onPressed: () {}, child: const Text("Choose Image")),
