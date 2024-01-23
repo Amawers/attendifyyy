@@ -15,13 +15,13 @@ class LogIn extends StatefulWidget {
   _LogInState createState() => _LogInState();
 }
 
-// tabang
+// DOUBLESSSSS
 class _LogInState extends State<LogIn> {
   bool obscurePassword = true;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  // var rememberMe = false;
+  var rememberMe = false;
   final _formKey = GlobalKey<FormState>();
 
   String _response = "";
@@ -34,29 +34,23 @@ class _LogInState extends State<LogIn> {
   @override
   void initState() {
     super.initState();
-    // fillInLoginCredentials();
+    fillInLoginCredentials();
   }
 
   //in first page load if there is an existing credentials stored in local storage
   //occupy the email and password controller with those values
-  // Future<void> fillInLoginCredentials() async {
-  //   teacherInfo = await RememberUserPreferences.readUserInfo();
-  //   email = teacherInfo?['email'] ?? "";
-  //   pass = teacherInfo?['password'] ?? "";
+ Future<void> fillInLoginCredentials() async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
 
-  //   print("email niya ${email}");
-  //   print("pass niya ${pass}");
-
-  //   if(rememberMe == true){
-  //   try {
-  //     setState(() {
-  //       emailController.text = email!;
-  //       passwordController.text = pass!;
-  //     });
-  //   } catch (error) {
-  //     print("way data email ug pass");
-  //   }}
-  // }
+      if(_prefs.getString('remember_email') != null &&
+          _prefs.getString('remember_pass') != null) {
+        setState(() {
+        emailController.text = _prefs.getString('remember_email')!;
+        passwordController.text = _prefs.getString('remember_pass')!;
+        rememberMe = true;
+        });
+      }
+  }
 
   //post credential to database
   Future<void> postSignUp() async {
@@ -98,21 +92,27 @@ class _LogInState extends State<LogIn> {
     * */
 
     //remember credentials if remember me checkbox is checked
-    // if (rememberMe) {
-    //   //check if remember credentials not exist in local storage
-    //   if (teacherInfo == null) {
-    //     //if not exist, store credentials to local
-    //     await RememberUserPreferences.storeUserInfo(
-    //         resBodyOfLogin["teacherData"]);
-    //   }
-    // }
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+    //remember credentials if remember me checkbox is checked
+    if (rememberMe) {
+      //check if remember credentials not exist in local storage
+      if (_prefs.getString('remember_email') == null &&
+          _prefs.getString('remember_pass') == null) {
+        //if not exist, store credentials to local
+        await _prefs.setString('remember_email', emailController.text);
+        await _prefs.setString('remember_pass', passwordController.text);
+      }
+    }
     //if remember me checkbox is unchecked, remove the local stored credentials
-    // else if (!rememberMe) {
-    //   if (teacherInfo != null) {
-    //     await RememberUserPreferences.deleteUserInfo();
-    //   }
-    // }
-    setState(() {});
+    else if (!rememberMe) {
+      if (_prefs.getString('remember_email') != null &&
+          _prefs.getString('remember_pass') != null) {
+        //if not exist, store credentials to local
+        await _prefs.remove('remember_email');
+        await _prefs.remove('remember_pass');
+      }
+    }
   }
 
   @override
@@ -191,23 +191,23 @@ class _LogInState extends State<LogIn> {
                 },
               ),
               const SizedBox(height: 7),
-              // Row(
-              //   children: [
-              //     Checkbox(
-              //         value: rememberMe,
-              //         activeColor: const Color(0xFF081631),
-              //         onChanged: (value) {
-              //           setState(() {
-              //             rememberMe = !rememberMe;
-              //           });
-              //         }),
-              //     const Text("Remember Me",
-              //         style: TextStyle(
-              //             color: Color(0xFF081631),
-              //             fontSize: 13.0,
-              //             fontWeight: FontWeight.bold))
-              //   ],
-              // ),
+              Row(
+                children: [
+                  Checkbox(
+                      value: rememberMe,
+                      activeColor: const Color(0xFF081631),
+                      onChanged: (value) {
+                        setState(() {
+                          rememberMe = !rememberMe;
+                        });
+                      }),
+                  const Text("Remember Me",
+                      style: TextStyle(
+                          color: Color(0xFF081631),
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold))
+                ],
+              ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {

@@ -305,11 +305,12 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
             style: TextStyle(
               color: Color(0xff081631),
               fontWeight: FontWeight.bold,
-              fontSize: 22,
+              fontSize: 16,
             ),
           ),
           // Diri sulod sa content i change pang backend nimo
           content: DropdownButtonFormField(
+            isExpanded: true,
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
