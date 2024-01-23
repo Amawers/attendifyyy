@@ -1,14 +1,20 @@
-import 'dart:convert';
+import 'package:flutter/material.dart';
+
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:attendifyyy/attendance/widgets/student_attendance_card.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; //to use DateFormat for date
 
-//filter options
+/*
+* filter options is use for the radio button in the bottom sheet
+* */
 List<String> filterOptions = ['All', 'Present', 'Late', 'Absent'];
-//Date
+/*
+* current date is use for the current date below the dropdown sections
+* */
 String currentDate = DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
 
 class AttendanceReport extends StatefulWidget {
@@ -352,232 +358,4 @@ class _AttendanceReportState extends State<AttendanceReport> {
   }
 }
 
-/*
- *
- * Use to create studentAttendance card based on the fetched data
- *
- *  */
-class studentAttendanceCard extends StatelessWidget {
-  String first_name;
-  String last_name;
-  String attendance_status;
-  String attendance_time;
-  studentAttendanceCard(
-      {required this.first_name,
-      required this.last_name,
-      required this.attendance_status,
-      required this.attendance_time});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(
-          bottom: 20.0), //served as space with its adjacent card
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: const Color(0xFFFFFFFF),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0x009a9a9a).withOpacity(1),
-            offset: const Offset(0, 3),
-            blurRadius: 5,
-            spreadRadius: 0,
-          )
-        ],
-      ),
-      child: Padding(
-        //card content padding
-        padding: const EdgeInsets.fromLTRB(16, 10, 22, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            /*
-            *
-            * Left side of the card content
-            * Student profile and name
-            *
-            * */
-            Row(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  child: const Icon(
-                    Icons.account_circle,
-                    size: 50,
-                    color: Colors.blueAccent,
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //first name of the student
-                    Text(
-                      first_name,
-                      style: const TextStyle(
-                        color: Color(0xFF1C2C4B),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    //last name of the student
-                    Text(
-                      last_name,
-                      style: const TextStyle(
-                        color: Color(0xFF1C2C4B),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            /*
-            *
-            * Right side of the card content
-            * Student attendance status
-            *
-            * */
-            StudentAttendanceStatus(
-                attendance_status: attendance_status,
-                attendance_time: attendance_time),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/*
-*
-* Use to create student attendance status content
-*
-* */
-class StudentAttendanceStatus extends StatelessWidget {
-  String attendance_status;
-  String attendance_time;
-  StudentAttendanceStatus(
-      {required this.attendance_status, required this.attendance_time});
-
-  @override
-  Widget build(BuildContext context) {
-    if (attendance_status == 'Present') {
-      return Column(
-        children: [
-          //This is the time n of the student
-          const Row(
-            children: [
-              Icon(
-                Icons.how_to_reg_outlined,
-                color: Colors.green,
-              ),
-              SizedBox(
-                width: 5,
-              ),
-              Text(
-                'PRESENT',
-                style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          //This is the time-in label text
-          Row(
-            children: [
-              Text(
-                '$attendance_time AM', //temporary
-                style: const TextStyle(
-                    color: Color(0xFF1C2C4B),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              const Text(
-                'TIME IN',
-                style: TextStyle(
-                  color: Color(0xFF1C2C4B),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          )
-        ],
-      );
-    } else if (attendance_status == 'Late') {
-      return Column(
-        children: [
-          //This is the time n of the student
-          const Row(
-            children: [
-              Icon(
-                Icons.timer_off,
-                color: Colors.orange,
-              ),
-              SizedBox(
-                width: 5,
-              ),
-              Text(
-                'LATE',
-                style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          //This is the time-in label text
-          Row(
-            children: [
-              Text(
-                '$attendance_time AM', //temporary
-                style: const TextStyle(
-                    color: Color(0xFF1C2C4B),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              const Text(
-                'TIME IN',
-                style: TextStyle(
-                  color: Color(0xFF1C2C4B),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          )
-        ],
-      );
-    } else {
-      return const Row(
-        children: [
-          Icon(
-            Icons.person_off,
-            color: Colors.red,
-          ),
-          SizedBox(
-            width: 5,
-          ),
-          Text(
-            'ABSENT',
-            style: TextStyle(
-                color: Colors.red, fontSize: 18, fontWeight: FontWeight.w900),
-          )
-        ],
-      );
-    }
-  }
-}

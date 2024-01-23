@@ -4,7 +4,7 @@ import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:http/http.dart' as http;
 
-
+//this is list of options for dayOfWeek dropdown button
 List<String> dayOfWeekList = [
   "Monday",
   "Tuesday",
@@ -52,7 +52,6 @@ class _CreateScheduleState extends State<CreateSchedule> {
           setState(() {
             converted = jsonDecode(response.body);
           });
-          // print("KANI SIYAAAA: ${converted[index]['subject_name']}");
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text("No subjects")));
@@ -73,7 +72,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
 
     String teacherId = teacherInfo?['teacher_id'];
 
-    print("Sulod sa start time: ${startTime}");
+    print("Sulod sa start time: $startTime");
     print('subject name sa FUNCTION $_subjectNameValue');
     print('section name sa FUNCTION $_sectionNameValue');
 
@@ -123,18 +122,15 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   decoration: InputDecoration(
                     labelText: "Subject",
                     contentPadding: const EdgeInsets.all(16.0),
-                    //border style when its focus
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
                         BorderSide(width: 2, color: Color(0xFF081631))),
-                    //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
                   items:
                   converted.map<DropdownMenuItem<String>>((dynamic value) {
@@ -261,12 +257,11 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     ),
                   ),
                   isExpanded: true, //set width to 100%
-                  // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
                   items: dayOfWeekList
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem(
-                        value: value, child: Text("$value"));
+                        value: value, child: Text(value));
                   }).toList(),
                   onChanged: (String? value) {
                     // This is called when the user selects an item.
