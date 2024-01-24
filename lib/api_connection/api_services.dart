@@ -26,6 +26,11 @@ class ApiServices {
   static String studentReferenceNumber = "";
   static String studentCourse = "";
   static String studentGradeLevel = "";
+  static List<String> subjectsSpecial = [];
+  static String studentId = '';
+  static String ScanfirstName = '';
+  static String middleInitial = '';
+  static String ScanlastName = '';
 
   static Future<void> updateAccount(
       {required BuildContext context,
@@ -192,8 +197,9 @@ class ApiServices {
 
     String teacherId = teacherInfo?['teacher_id'];
 
-    print("CHECK BACKEND: $subject");
-    print("CHECK BACKEND: $section");
+    print("CHECK TEACHERID: $teacherId");
+    print("CHECK SUBJECT: $subject");
+    print("CHECK SECTION: $section");
 
     try {
       final response = await http.post(Uri.parse(Api.listOfAttendance), body: {
@@ -237,6 +243,8 @@ class ApiServices {
     } catch (error) {
       AttendanceReport.filterData.clear();
       attendanceListData.clear();
+
+      print(error);
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("NO ATTENDANCE RECORD FOR SUBJECT",
@@ -743,8 +751,8 @@ class ApiServices {
   static Future<void> deleteStudent(
       {required BuildContext context, String? studentId}) async {
     try {
-      final response = await http.delete(
-        Uri.parse('${Api.deleteStudent}?student_id=${studentId}'));
+      final response = await http
+          .delete(Uri.parse('${Api.deleteStudent}?student_id=${studentId}'));
       if (response.statusCode == 200) {
         var decoded = jsonDecode(response.body);
 
@@ -770,6 +778,98 @@ class ApiServices {
       }
     } catch (error) {
       print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> getListOfSubjectSpecial() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String? teacherId = teacherInfo?['teacher_id'];
+
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
+      if (response.statusCode == 200) {
+        print("RETRIEVE TEACHER DATA: Connection to API established.");
+
+        var decoded = jsonDecode(response.body);
+        subjectListData = decoded['subject_list_data'];
+
+        if (decoded['success'] == true) {
+          print("RETRIEVE TEACHER DATA: Data retrieval success.");
+
+          subjectsSpecial = List<String>.from(subjectListData
+              .map((dynamic subject) => subject['subject_name'].toString()));
+        } else if (decoded['success'] == false) {
+          print("RETRIEVE TEACHER DATA: Data retrieval failed.");
+        }
+      } else {
+        print("RETRIEVE SUBJECTS LIST: Problem communicating with API.");
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> processResult(
+      {required BuildContext context,
+      String? result,
+      String? selectedSubject}) async {
+    if (result != null) {
+      List<String> attributes = result.split('\t');
+
+      if (attributes.length == 5) {
+        studentId = attributes[0];
+        ScanfirstName = attributes[1];
+        middleInitial = attributes[2]?.isNotEmpty == true ? attributes[2] : '';
+        ScanlastName = attributes[3];
+        String course = attributes[4];
+        // Values are printed inside the debug console to check if it has successfully retrieved information from a QR Code after scanning.
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("BARCODE FOUND!",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1)));
+
+        try {
+          final response = await http.post(Uri.parse(Api.createAttendance),
+              body: {
+                'subject_name': selectedSubject,
+                'reference_number': studentId
+              });
+          var decoded = jsonDecode(response.body);
+          if (response.statusCode == 200) {
+            print("API Connection established.");
+
+            if (decoded['success'] == true) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("ATTENDANCE RECORDED LODICAKES!",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 1)));
+            } else if (decoded['success'] == false) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("FAILED TO DELETE",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 1)));
+            }
+          } else {
+            print("Problem connecting with API.");
+          }
+        } catch (error) {
+          print("Data to pass problem.");
+        }
+      } else {
+        print('Not valid.');
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("INVALID QR CODE, PLEASE USE SAKTO LODS",
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 1)));
     }
   }
 }

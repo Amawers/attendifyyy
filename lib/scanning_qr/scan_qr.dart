@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/scanning_qr/scan_qr_overlay.dart';
 import 'package:flutter/material.dart';
@@ -14,96 +15,25 @@ class ScanQrScreen extends StatefulWidget {
 }
 
 class _ScanQrScreenState extends State<ScanQrScreen> {
-  String? id;
-  String firstName = '';
-  String middleInitial = '';
-  String lastName = '';
 
   List<dynamic> studentAttendanceData = [];
-  List<dynamic> converted = [];
+  // List<dynamic> converted = [];
 
   // Initialization for subject selection
   // Remove lang ni pag implement nimos backend then puliha tung naa sa dropdown to the retrieved schedules.
   String? selectedSubject;
   String? selectedSectionName;
-  List<String> subjects = [];
 
   @override
   void initState() {
     super.initState();
-    getListOfSubjects();
+    ApiServices.getListOfSubjectSpecial();
 
     // To immediately be greeted with the pop up dialog when opening the QR Scanner
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-         await getListOfSubjects();
+      await ApiServices.getListOfSubjectSpecial();
       _showSubjectSelectionDialog(context);
     });
-  }
-
-  Future<void> getListOfSubjects() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-
-    String? teacherId = teacherInfo?['teacher_id'];
-    if (teacherId != null && teacherId.isNotEmpty) {
-      final response = await http
-          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          converted = jsonDecode(response.body);
-          print('VALUE OF CONVERTED: $converted');
-          setState(() {
-            subjects = List<String>.from(converted
-                .map((dynamic subject) => subject['subject_name'].toString()));
-          });
-          print("sulod sa subjects: $subjects");
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No subjects")));
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
-      }
-    } else {
-      print("Error: Teacher ID is null or empty");
-    }
-  }
-
-  Future<void> processResult(String? result) async {
-    if (result != null) {
-      List<String> attributes = result.split('\t');
-
-      if (attributes.length == 5) {
-        id = attributes[0];
-        firstName = attributes[1];
-        middleInitial = attributes[2]?.isNotEmpty == true ? attributes[2] : '';
-        lastName = attributes[3];
-        String course = attributes[4];
-        // Values are printed inside the debug console to check if it has successfully retrieved information from a QR Code after scanning.
-        print('Barcode Found!');
-        print(
-            'ID: $id\nFirst Name: $firstName\nMiddle Initial: ${middleInitial ?? ''}\nLast Name: $lastName\nCourse: $course');
-
-        print(
-            "BEFORE E PROCESS SELECTED SUBJECT: ${selectedSubject} & REFERENCE ID: ${id}");
-        try {
-          final response = await http.post(Uri.parse(Api.createAttendance),
-              body: {'subject_name': selectedSubject, 'reference_number': id});
-          if (response.statusCode == 200) {
-            print(jsonDecode(response.body));
-          }
-        } catch (error) {
-          print("Wala na process ang attendance");
-        }
-
-        setState(() {
-          // To update the displayed scanned name
-        });
-      } else {
-        print('Not valid.');
-      }
-    }
   }
 
   // Method to concatenate the scanned name to Full Name
@@ -149,8 +79,12 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                 onDetect: (capture) {
                   final List<Barcode> barcodes = capture.barcodes;
                   for (final barcode in barcodes) {
-                    processResult(barcode.rawValue);
+                    ApiServices.processResult(context: context, selectedSubject: selectedSubject, result: barcode.rawValue);
+                    
                   }
+                  setState(() {
+                    
+                  });
                 },
               ),
             ),
@@ -213,13 +147,13 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (firstName.isNotEmpty || lastName.isNotEmpty)
+                  if (ApiServices.ScanfirstName.isNotEmpty || ApiServices.ScanlastName.isNotEmpty)
                     Column(
                       children: [
                         // The displayed scanned name
                         Text(
                           concatenateScannedName(
-                              firstName, middleInitial, lastName),
+                              ApiServices.ScanfirstName, ApiServices.middleInitial, ApiServices.ScanlastName),
                           style: const TextStyle(
                             color: Color(0xff081631),
                             fontWeight: FontWeight.bold,
@@ -296,7 +230,6 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
   // The "Select Subject" pop up dialog with the Dropdown menu
   void _showSubjectSelectionDialog(BuildContext context) async {
-
     final selected = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -329,7 +262,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
               });
               Navigator.pop(context, newValue);
             },
-            items: subjects.map((String value) {
+            items: ApiServices.subjectsSpecial.map((String value) {
               return DropdownMenuItem(
                 value: value,
                 child: Text(value),
