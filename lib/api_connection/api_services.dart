@@ -410,4 +410,132 @@ class ApiServices {
       print("DEVSIDE TO HANDLE");
     }
   }
+
+  static Future<void> editSubject(
+      {required BuildContext context,
+      String? subTeacherId,
+      String? subject,
+      String? subjectCode,
+      String? section,
+      String? semester}) async {
+    try {
+      final response = await http.put(Uri.parse(Api.updateSubjectData), body: {
+        'subject_teachers_id': subTeacherId,
+        'subject_name': subject,
+        'subject_code': subjectCode,
+        'section_name': section,
+        'semester': semester
+      });
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("EDITED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO EDIT",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> deleteSubject(
+      {required BuildContext context,
+      String? subjectId,
+      String? sectionId}) async {
+    try {
+      final response = await http.delete(Uri.parse(Api.deleteSubject),
+          body: {'subject_id': subjectId, 'section_id': sectionId});
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("DELETED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO DELETE",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> createSubject(
+      {required BuildContext context,
+      String? subject,
+      String? subjectCode,
+      String? section,
+      String? semester
+      }) async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    try {
+      final response = await http.post(Uri.parse(Api.createSubject), body: {
+        'teacher_id': teacherId,
+        'subject_name': subject,
+        'subject_code': subjectCode,
+        'section_name': section,
+        'semester': semester
+      });
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("CREATED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO CREATE",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
 }
