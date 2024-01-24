@@ -17,6 +17,15 @@ class ApiServices {
   static List<dynamic> attendanceListData = [];
   static List<dynamic> subjectListData = [];
   static List<dynamic> scheduleListData = [];
+  static List<dynamic> studentListData = [];
+  static List<dynamic> studentSubjectData = [];
+  static String studentFname = "";
+  static String studentMinitial = "";
+  static String studentLname = "";
+  static String studentEmail = "";
+  static String studentReferenceNumber = "";
+  static String studentCourse = "";
+  static String studentGradeLevel = "";
 
   static Future<void> updateAccount(
       {required BuildContext context,
@@ -496,8 +505,7 @@ class ApiServices {
       String? subject,
       String? subjectCode,
       String? section,
-      String? semester
-      }) async {
+      String? semester}) async {
     Map<String, dynamic>? teacherInfo =
         await RememberUserPreferences.readUserInfo();
 
@@ -523,6 +531,232 @@ class ApiServices {
         } else if (decoded['success'] == false) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("FAILED TO CREATE",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> getListOfStudents({
+    required BuildContext context,
+    String? subject,
+    String? sectionId,
+    String? subjectId,
+  }) async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    try {
+      final response = await http.post(Uri.parse(Api.listOfStudents), body: {
+        'subject_name': subject,
+        'section_id': sectionId,
+        'subject_id': subjectId,
+        'teacher_id': teacherId
+      });
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          studentListData = decoded['student_list_data'];
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("RETRIEVE SUBJECTS SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("NO SCHEDULE FOR CURRENT TEACHER",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 4)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("kani nag eror $error");
+    }
+  }
+
+  static Future<void> createStudent(
+      {required BuildContext context,
+      String? referenceNumber,
+      String? fName,
+      String? mName,
+      String? lName,
+      String? email,
+      String? course,
+      String? gradeLevel,
+      String? sectionId,
+      String? subjectId}) async {
+    try {
+      final response = await http.post(Uri.parse(Api.createStudent), body: {
+        'reference_number': referenceNumber,
+        'first_name': fName,
+        'middle_initial': mName,
+        'last_name': lName,
+        'email': email,
+        'course': course,
+        'grade_level': gradeLevel,
+        'section_id': sectionId,
+        'subject_id': subjectId
+      });
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("CREATED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO CREATE",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> getStudentData(
+      {required BuildContext context, String? studentId}) async {
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.getStudentData}?student_id=${studentId}'));
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+        studentSubjectData = decoded['student_subject_data'];
+
+        if (decoded['success'] == true) {
+          studentFname = studentSubjectData[0]['first_name'];
+          studentMinitial = studentSubjectData[0]['middle_initial'];
+          studentLname = studentSubjectData[0]['last_name'];
+          studentEmail = studentSubjectData[0]['email'];
+          studentReferenceNumber = studentSubjectData[0]['reference_number'];
+          studentCourse = studentSubjectData[0]['course'];
+          studentGradeLevel = studentSubjectData[0]['grade_level'];
+
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("CREATED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO CREATE",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> editStudent(
+      {required BuildContext context,
+      String? studentId,
+      String? referenceNumber,
+      String? fName,
+      String? mName,
+      String? lName,
+      String? email,
+      String? course,
+      String? gradeLevel}) async {
+    try {
+      final response = await http.put(Uri.parse(Api.updateStudentData), body: {
+        'student_id': studentId,
+        'reference_number': referenceNumber,
+        'first_name': fName,
+        'middle_initial': mName,
+        'last_name': lName,
+        'email': email,
+        'course': course,
+        'grade_level': gradeLevel,
+      });
+
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("EDITED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO EDIT",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1)));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("PROBLEM COMMUNICATING WITH SERVER",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 1)));
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
+    }
+  }
+
+  static Future<void> deleteStudent(
+      {required BuildContext context, String? studentId}) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${Api.deleteStudent}?student_id=${studentId}'));
+      if (response.statusCode == 200) {
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("DELETED SUCCESSFULLY",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1)));
+        } else if (decoded['success'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("FAILED TO DELETE",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 1)));

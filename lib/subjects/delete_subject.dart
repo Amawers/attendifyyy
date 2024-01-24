@@ -52,12 +52,12 @@ class _DeleteSubjectState extends State<DeleteSubject> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    ApiServices.deleteSubject(
+                  onPressed: () async {
+                    await ApiServices.deleteSubject(
                         context: context,
                         subjectId: widget.subject_id,
                         sectionId: widget.section_id);
-                    Navigator.pushReplacement(
+                    await Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ListOfSubjects()));

@@ -111,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Handle network or other errors
       print("Error during image retrieval: $error");
     }
-    setState(() {});
+    // setState(() {});
   }
 
   Future<void> getTeacherName() async {

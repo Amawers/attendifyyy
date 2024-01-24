@@ -139,17 +139,17 @@ class _EditSubject extends State<EditSubject> {
                 ),
                 const SizedBox(height: 20.0),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     //validate textfields
                     if (_subjectFormKey.currentState!.validate()) {
-                      ApiServices.editSubject(
+                      await ApiServices.editSubject(
                           context: context,
                           subTeacherId: widget.subject_teachers_id,
                           subject: subjectNameController.text,
                           subjectCode: subjectCodeController.text,
                           section: sectionNameController.text,
                           semester: semesterValue);
-                      Navigator.pushReplacement(
+                      await Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ListOfSubjects()));
