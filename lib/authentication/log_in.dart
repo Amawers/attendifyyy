@@ -205,7 +205,7 @@ class _LogInState extends State<LogIn> {
                       });
                     },
                     child: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      obscurePassword ? Icons.visibility_off : Icons.visibility,
                       color: const Color(0xFF081631),
                     ),
                   ),
