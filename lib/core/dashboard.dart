@@ -215,10 +215,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     /* stats cards */
                     createStatsCard(Icons.playlist_add_check_outlined,
-                        0xFF039000, "PRESENT", recentAttendanceList.length),
-                    createStatsCard(Icons.person_off, 0xFFFF0000, "ABSENT", 0),
+                        0xFF039000, "Present", recentAttendanceList.length),
+                    createStatsCard(Icons.person_off, 0xFFFF0000, "Absent", 0),
                     createStatsCard(
-                        Icons.timer_off_rounded, 0xFFFF9900, "LATE", 0),
+                        Icons.timer_off_rounded, 0xFFFF9900, "Late", 0),
                   ],
                 )
               ],

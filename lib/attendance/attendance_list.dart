@@ -1,7 +1,8 @@
-// ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, unused_local_variable
+// ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, unused_local_variable, use_build_context_synchronously
 
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/attendance/widgets/student_attendance_card.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
@@ -20,94 +21,71 @@ String currentDate = DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
 
 class AttendanceReport extends StatefulWidget {
   const AttendanceReport({super.key});
+  static List<dynamic> filterData = [];
 
   @override
-  State<AttendanceReport> createState() => _AttendanceReportState();
+  State<AttendanceReport> createState() => AttendanceReportState();
 }
 
-class _AttendanceReportState extends State<AttendanceReport> {
-  List<dynamic> converted = [];
-  List<String> subjects = [];
-  List<String> sections = [];
-  String? selectedSubject;
-  String? selectedSectionName;
-  //this is where the first or the original fetched studentAttendanceData will be stored
-  List<dynamic> studentAttendanceDataOriginal = [];
-  //this is the studentAttendanceData that going to be use for making student cards
-  //this is also the list that will be filtered when selecting a filter option
-  List<dynamic> studentAttendanceData =
-      []; //by default its value is the studentAttendanceDAtaOriginal
-
+class AttendanceReportState extends State<AttendanceReport> {
+  String selectedSubject = '';
+  String selectedSectionName = '';
   @override
   void initState() {
     super.initState();
-    getListOfSubjects();
+    fetchData();
   }
 
-  //fetching data from database
-  Future<void> getListOfSubjects() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
+  Future<void> fetchData() async {
+    await ApiServices.getListOfSubjects();
 
-    String? teacherId = teacherInfo?['teacher_id'];
-    if (teacherId != null && teacherId.isNotEmpty) {
-      final response = await http
-          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          converted = jsonDecode(response.body);
-          print('VALUE OF CONVERTED: $converted');
-          setState(() {
-            selectedSubject = converted[0]['subject_name'];
-            selectedSectionName = converted[0]['section_name'];
-            getAttendanceList();
-          });
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No subjects")));
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
-      }
-    } else {
-      print("Error: Teacher ID is null or empty");
-    }
-  }
+    setState(() {
+      selectedSubject = ApiServices.subject;
+      selectedSectionName = ApiServices.section;
+    });
 
-  //use for fetching all attendance list of the selected subject
-  Future<void> getAttendanceList() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
+    await ApiServices.getAttendanceList(
+        context: context,
+        subject: selectedSubject,
+        section: selectedSectionName);
 
-    String teacherId = teacherInfo?['teacher_id'];
-
-    try {
-      print('SELECTED SUBJECT ${selectedSubject}');
-      print('SELECTED SECTION ${selectedSectionName}');
-      final response = await http.post(Uri.parse(Api.listOfAttendance), body: {
-        'teacher_id': teacherId,
-        'subject_name': selectedSubject,
-        'section_name': selectedSectionName
-      });
-      if (response.statusCode == 200) {
-        try {
-          studentAttendanceDataOriginal = jsonDecode(response.body);
-          studentAttendanceData = studentAttendanceDataOriginal;
-          print(
-              "Attendance sa student nga sa specific teacher ug subject: ${studentAttendanceDataOriginal ?? ""}");
-        } catch (error) {
-          print("No attendance data for specific teacher ug subject");
-          studentAttendanceDataOriginal.clear();
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
-      }
-    } catch (error) {
-      print("wala mi connect sa backend");
-    }
     setState(() {});
+  }
+
+  void handleFilterSelection(String? selectedFilter) {
+    setState(() {
+      this.selectedFilter = selectedFilter;
+      Navigator.pop(context); // Close bottom sheet
+
+      // Reset filterData to an empty list
+      AttendanceReport.filterData = [];
+
+      switch (selectedFilter) {
+        case 'All':
+          AttendanceReport.filterData = ApiServices.attendanceListData;
+          break;
+        case 'Present':
+        case 'Late':
+        case 'Absent':
+          AttendanceReport.filterData = ApiServices.attendanceListData
+              .where(
+                  (student) => student['attendance_status'] == selectedFilter)
+              .toList();
+          break;
+      }
+
+      // Check if there are no students with the selected filter
+      if (AttendanceReport.filterData.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+            "No students with the selected filter",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 1),
+        ));
+      }
+    });
   }
 
   //variable that holds the current selected filter
@@ -117,7 +95,8 @@ class _AttendanceReportState extends State<AttendanceReport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Attendance Report'),
+          title: const Text('Attendance Report', style: TextStyle(color: Color(0xFF081631))),
+          backgroundColor: Colors.white,
           leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
@@ -151,23 +130,31 @@ class _AttendanceReportState extends State<AttendanceReport> {
                         underline:
                             const SizedBox(), //make the dropdownbutton underline invisible
                         focusColor: Colors.transparent,
-                        items: converted
+                        items: ApiServices.subjectListData
                             .map<DropdownMenuItem<String>>((dynamic value) {
                           String combinedValue =
                               "${value['section_name']} - ${value['subject_name']}";
                           return DropdownMenuItem(
                               value: combinedValue, child: Text(combinedValue));
                         }).toList(),
-                        onChanged: (String? newValue) {
+                        onChanged: (String? newValue) async {
                           List<String> values =
                               newValue!.split(RegExp(r'\s-\s'));
                           setState(() {
-                            print("BEFORE E SPLIT $values");
+                            selectedFilter = "All";
+                            AttendanceReport.filterData.clear();
+                            ApiServices.attendanceListData.clear();
                             selectedSectionName = values[0];
                             selectedSubject = values[1];
-                                                        getAttendanceList();
-
                           });
+                          await ApiServices.getAttendanceList(
+                                  context: context,
+                                  subject: selectedSubject,
+                                  section: selectedSectionName)
+                              .then((_) {
+                            setState(() {});
+                          });
+
                           // if (selectedSectionId != null &&
                           //     selectedSubject != null) {
                           //   getAttendanceList();
@@ -207,126 +194,90 @@ class _AttendanceReportState extends State<AttendanceReport> {
                 * Filter option
                 *
                 * */
-                IconButton(
-                  icon: const Icon(Icons.filter_list),
-                  onPressed: () {
-                    /*
-                      *
-                      * this is the bottom sheet that will popup when filter icon is clicked
-                      *
-                      * */
-                    showModalBottomSheet<void>(
-                      //remove constraints in height to customized the minHeight
-                      constraints: const BoxConstraints(
-                        minHeight: 260.0,
-                      ),
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                /*
-                                  *
-                                  * heading title
-                                  *
-                                  * */
-                                const Center(
-                                    child: Text("Filter",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18.0,
-                                        ))),
-                                const SizedBox(height: 10.0),
-                                /*
-                                  *
-                                  * radio button list
-                                  *
-                                  * */
-                                RadioListTile<String>(
-                                  title: Text(filterOptions[0]),
-                                  value: filterOptions[0],
-                                  groupValue: selectedFilter,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      selectedFilter =
-                                          value; //set the current selectedradio button
-                                      Navigator.pop(
-                                          context); //close bottomsheet
-                                      studentAttendanceData =
-                                          studentAttendanceDataOriginal; //filter the studentAttendanceDate
-                                    });
-                                  },
-                                ),
-                                RadioListTile<String>(
-                                  title: Text(filterOptions[1]),
-                                  value: filterOptions[1],
-                                  groupValue: selectedFilter,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      selectedFilter = value;
-                                      Navigator.pop(
-                                          context); //close bottomsheet
-                                      print(studentAttendanceDataOriginal[0]
-                                          ['attendance_status']);
-                                      studentAttendanceData =
-                                          studentAttendanceDataOriginal
-                                              .where((student) =>
-                                                  student[
-                                                      'attendance_status'] ==
-                                                  "Present")
-                                              .toList(); //filter the studentAttendanceDate
-                                    });
-                                  },
-                                ),
-                                RadioListTile<String>(
-                                  title: Text(filterOptions[2]),
-                                  value: filterOptions[2],
-                                  groupValue: selectedFilter,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      selectedFilter = value;
-                                      Navigator.pop(
-                                          context); //close bottomsheet
-                                      studentAttendanceData =
-                                          studentAttendanceDataOriginal
-                                              .where((student) =>
-                                                  student[
-                                                      'attendance_status'] ==
-                                                  "Late")
-                                              .toList(); //filter the studentAttendanceDate
-                                    });
-                                  },
-                                ),
-                                RadioListTile<String>(
-                                  title: Text(filterOptions[3]),
-                                  value: filterOptions[3],
-                                  groupValue: selectedFilter,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      selectedFilter = value;
-                                      Navigator.pop(
-                                          context); //close bottomsheet
-                                      studentAttendanceData =
-                                          studentAttendanceDataOriginal
-                                              .where((student) =>
-                                                  student[
-                                                      'attendance_status'] ==
-                                                  "Absent")
-                                              .toList(); //filter the studentAttendanceDate
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
+                Row(
+                  children: [
+                    Text('$selectedFilter',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    IconButton(
+                      icon: const Icon(Icons.filter_list),
+                      onPressed: () {
+                        /*
+                          *
+                          * this is the bottom sheet that will popup when filter icon is clicked
+                          *
+                          * */
+                        showModalBottomSheet<void>(
+                          //remove constraints in height to customized the minHeight
+                          constraints: const BoxConstraints(
+                            minHeight: 260.0,
                           ),
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SizedBox(
+                              height: 200,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    /*
+                                      *
+                                      * heading title
+                                      *
+                                      * */
+                                    const Center(
+                                        child: Text("Filter",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18.0,
+                                            ))),
+                                    const SizedBox(height: 10.0),
+                                    /*
+                                      *
+                                      * radio button list
+                                      *
+                                      * */
+                                    RadioListTile<String>(
+                                      title: Text(filterOptions[0]),
+                                      value: filterOptions[0],
+                                      groupValue: selectedFilter,
+                                      onChanged: (String? value) {
+                                        handleFilterSelection("All");
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: Text(filterOptions[1]),
+                                      value: filterOptions[1],
+                                      groupValue: selectedFilter,
+                                      onChanged: (String? value) {
+                                        handleFilterSelection("Present");
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: Text(filterOptions[2]),
+                                      value: filterOptions[2],
+                                      groupValue: selectedFilter,
+                                      onChanged: (String? value) {
+                                        handleFilterSelection("Late");
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: Text(filterOptions[3]),
+                                      value: filterOptions[3],
+                                      groupValue: selectedFilter,
+                                      onChanged: (String? value) {
+                                        handleFilterSelection("Absent");
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -338,17 +289,20 @@ class _AttendanceReportState extends State<AttendanceReport> {
             * */
             Expanded(
               child: ListView.builder(
-                itemCount: studentAttendanceData.length,
+                itemCount: AttendanceReport.filterData.length,
                 itemBuilder: (context, index) {
                   return studentAttendanceCard(
-                      first_name:
-                          studentAttendanceData[index]['first_name'] ?? "",
+                      first_name: AttendanceReport.filterData[index]
+                              ['first_name'] ??
+                          "",
                       last_name:
-                          studentAttendanceData[index]['last_name'] ?? "",
-                      attendance_status: studentAttendanceData[index]
-                          ['attendance_status'],
-                      attendance_time: studentAttendanceData[index]
-                          ['formatted_time']);
+                          AttendanceReport.filterData[index]['last_name'] ?? "",
+                      attendance_status: AttendanceReport.filterData[index]
+                              ['attendance_status'] ??
+                          "",
+                      attendance_time: AttendanceReport.filterData[index]
+                              ['formatted_time'] ??
+                          "");
                 },
               ),
             ),

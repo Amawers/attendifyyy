@@ -30,7 +30,9 @@ class _AccountSettingsState extends State<AccountSettings> {
   void initState() {
     super.initState();
     ApiServices.getTeacherData().then((_) {
-      ApiServices.retrieveImage().then((_) {
+      ApiServices.retrieveImage(
+        context: context
+      ).then((_) {
         initializeControllerValues();
         setState(() {});
       });
@@ -280,7 +282,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                           contactNoController: contactNoController,
                           departmentController: departmentController,
                         );
-                        await ApiServices.retrieveImage();
+                        await ApiServices.retrieveImage(context: context);
                         setState(() {
                           ApiServices.imagePath;
                         });

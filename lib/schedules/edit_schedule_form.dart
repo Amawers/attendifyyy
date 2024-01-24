@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:attendifyyy/api_connection/api_services.dart';
+import 'package:attendifyyy/schedules/create_schedule.dart';
 import "package:flutter/material.dart";
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
@@ -36,53 +38,6 @@ class _EditScheduleState extends State<EditSchedule> {
   TimeOfDay startTime = TimeOfDay.now();
   TimeOfDay endTime = TimeOfDay.now();
   String? _dayWeekValue;
-
-  List<dynamic> converted = [];
-
-  @override
-  void initState() {
-    super.initState();
-    getListOfSubjects();
-  }
-
-  Future<void> getListOfSubjects() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-
-    String? teacherId = teacherInfo?['teacher_id'];
-    if (teacherId != null && teacherId.isNotEmpty) {
-      final response = await http
-          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          setState(() {
-            converted = jsonDecode(response.body);
-          });
-          // print("KANI SIYAAAA: ${converted[index]['subject_name']}");
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No subjects")));
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
-      }
-    } else {
-      print("Error: Teacher ID is null or empty");
-    }
-  }
-
-  //post newly created schedule to the database
-  Future<void> editSchedule() async {
-    final response = await http.put(Uri.parse(Api.updateSchedule), body: {
-      'schedule_id': widget.schedule_id,
-      'start_time': "$startTime.",
-      'end_time': "$endTime",
-      'days_of_week': _dayWeekValue
-    });
-
-    print(response.body);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -227,9 +182,14 @@ class _EditScheduleState extends State<EditSchedule> {
                 *
                 * */
                 TextButton(
-                    onPressed: () {
-                      print("pressed");
-                      editSchedule();
+                    onPressed: () async {
+                      await ApiServices.editSchedule(
+                          schedule: widget.schedule_id,
+                          start: startTime,
+                          end: endTime,
+                          dayWeekValue: _dayWeekValue,
+                          context: context);
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ListOfSchedules()));
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(
