@@ -1,6 +1,8 @@
-// ignore_for_file: use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api, unused_field, prefer_typing_uninitialized_variables, no_leading_underscores_for_local_identifiers
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:attendifyyy/utils/common_widgets/text_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/sign_up.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
@@ -304,4 +306,39 @@ class _LogInState extends State<LogIn> {
       ),
     );
   }
+}
+
+/*
+*
+* Widget components
+*
+*
+* */
+Widget createTextField(valueController, label, validationFunction) {
+  return TextFormField(
+    validator: validationFunction,
+    controller: valueController,
+    decoration: InputDecoration(
+      labelText: label,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+      labelStyle: const TextStyle(
+          color: Color(0xFFABABAB),
+          fontSize: 14), //affect the size of textfield
+      floatingLabelStyle: const TextStyle(color: Color(0xFF081631)),
+      //when textField is focused or selected
+      focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFF081631))),
+      //normal state of textField border
+      enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFABABAB))), // your color
+      errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(color: Color(0xFFFF0000))),
+      focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderSide: BorderSide(width: 2, color: Color(0xFFFF0000))),
+    ),
+  );
 }

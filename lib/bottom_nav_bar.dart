@@ -4,16 +4,13 @@ import 'package:attendifyyy/scanning_qr/scan_qr.dart';
 import 'package:attendifyyy/attendance/attendance_list.dart';
 import 'package:flutter/material.dart';
 
-
-// Kani siya na widget present ni siya sa tanan pages 
+// Kani siya na widget present ni siya sa tanan pages
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
 }
-
-
 
 class _BottomNavBarState extends State<BottomNavBar> {
   /* Magdetermine kung unsa na nga page, ang initial 
@@ -23,7 +20,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   /* List sa mga page which is an index gamiton para
   sa pag navigate kada page*/
   /**/
-  List<Widget> pages =  [
+  List<Widget> pages = [
     DashboardScreen(),
     ScanQrScreen(),
     SettingsScreen(),
@@ -39,6 +36,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
       bottomNavigationBar: SizedBox(
         height: 65,
         child: BottomNavigationBar(
+          selectedIconTheme: const IconThemeData(
+            color: Color(0xFF081631),
+          ),
+          selectedItemColor: Color(0xFF081631),
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
@@ -56,7 +57,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ],
           currentIndex: currentPage,
           selectedLabelStyle: const TextStyle(
-            color: Color(0xFF081631), // Change the color for the selected label
             fontWeight: FontWeight.bold, // Add any other styles as needed
           ),
           /* Logic para sa pag change sa page, basically alisdan ra ang integer value 
