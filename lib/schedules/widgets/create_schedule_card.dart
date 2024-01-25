@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/schedules/create_schedule.dart';
+import 'package:attendifyyy/schedules/delete_schedule.dart';
 import 'package:attendifyyy/schedules/edit_schedule_form.dart';
 import 'package:flutter/material.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
@@ -109,12 +112,21 @@ class ClassScheduleCard extends StatelessWidget {
                                           day_of_week: day_of_week)));
                             } else if (value == 1) {
                               // print("Class Schedule delete.");
-                              ApiServices.deleteSchedule(
-                                  context: context, schedule_id: schedule_id);
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ListOfSchedules()));
+                              // await ApiServices.deleteSchedule(
+                              //     context: context, schedule_id: schedule_id);
+                              // await Navigator.pushReplacement(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (context) => ListOfSchedules()));
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) => Dialog(
+                                  child: DeleteSchedule(
+                                    schedule_id: schedule_id,
+                                  ),
+                                ),
+                              );
                             }
                           }),
                     ])),

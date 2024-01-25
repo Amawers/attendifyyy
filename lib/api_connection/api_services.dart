@@ -300,11 +300,7 @@ class ApiServices {
             duration: Duration(seconds: 1)));
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("AN APP ERROR OCCURED",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 1)));
+      print("DEVSIDE TO HANDLE");
     }
   }
 

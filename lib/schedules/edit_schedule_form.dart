@@ -189,7 +189,7 @@ class _EditScheduleState extends State<EditSchedule> {
                           end: endTime,
                           dayWeekValue: _dayWeekValue,
                           context: context);
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ListOfSchedules()));
+                      await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ListOfSchedules()));
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(
