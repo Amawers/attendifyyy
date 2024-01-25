@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/schedules/create_schedule.dart';
@@ -197,6 +199,12 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 *
                 * */
                 DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "This field is required.";
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                     labelText: "Days in a week",
                     contentPadding: const EdgeInsets.all(16.0),
@@ -232,20 +240,21 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 *
                 * */
                 TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_subjectFormKey.currentState!.validate()) {
-                        ApiServices.createSchedule(
+                        await ApiServices.createSchedule(
+
                             context: context,
                             subject: _subjectNameValue,
                             section: _sectionNameValue,
                             start: startTime,
                             end: endTime,
                             dayWeekValue: _dayWeekValue);
+                        await Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ListOfSchedules()));
                       }
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ListOfSchedules()));
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(

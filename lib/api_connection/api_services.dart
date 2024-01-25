@@ -300,13 +300,10 @@ class ApiServices {
             duration: Duration(seconds: 1)));
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("AN APP ERROR OCCURED",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 1)));
+      print("DEVSIDE TO HANDLE");
     }
   }
+
 
   static Future<void> getListOfSchedules(
       {required BuildContext context}) async {
@@ -318,6 +315,7 @@ class ApiServices {
     try {
       final response = await http
           .get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
+
       if (response.statusCode == 200) {
         var decoded = jsonDecode(response.body);
 
@@ -334,6 +332,7 @@ class ApiServices {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 4)));
+
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -364,6 +363,7 @@ class ApiServices {
         'end_time': "$end",
         'days_of_week': dayWeekValue
       });
+
       if (response.statusCode == 200) {
         var decoded = jsonDecode(response.body);
 
@@ -483,6 +483,7 @@ class ApiServices {
 
       if (response.statusCode == 200) {
         var decoded = jsonDecode(response.body);
+
 
         if (decoded['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
