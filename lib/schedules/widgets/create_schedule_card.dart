@@ -3,6 +3,7 @@
 import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/schedules/create_schedule.dart';
 import 'package:attendifyyy/schedules/delete_schedule.dart';
+
 import 'package:attendifyyy/schedules/edit_schedule_form.dart';
 import 'package:flutter/material.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
@@ -127,6 +128,7 @@ class ClassScheduleCard extends StatelessWidget {
                                   ),
                                 ),
                               );
+
                             }
                           }),
                     ])),
