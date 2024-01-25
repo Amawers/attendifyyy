@@ -1,8 +1,11 @@
+import 'package:attendifyyy/api_connection/api_services.dart';
+import 'package:attendifyyy/schedules/create_schedule.dart';
 import 'package:attendifyyy/schedules/edit_schedule_form.dart';
 import 'package:flutter/material.dart';
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
 /*
 *
 * Use for creating class schedule card
@@ -26,14 +29,6 @@ class ClassScheduleCard extends StatelessWidget {
       required this.end_time,
       required this.day_of_week,
       required this.backgroundColor});
-
-  Future<void> deleteSchedule(String schedule_id) async {
-    final response = await http
-        .delete(Uri.parse('${Api.deleteSchedule}?schedule_id=${schedule_id}'));
-    if (response.statusCode == 200) {
-      print('Na delete? ${jsonDecode(response.body)}');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,11 +101,20 @@ class ClassScheduleCard extends StatelessWidget {
                             if (value == 0) {
                               showDialog(
                                   context: context,
-                                  builder: (BuildContext context) =>
-                                      Dialog(child: EditSchedule(schedule_id: schedule_id, start_time: start_time, end_time: end_time, day_of_week: day_of_week)));
+                                  builder: (BuildContext context) => Dialog(
+                                      child: EditSchedule(
+                                          schedule_id: schedule_id,
+                                          start_time: start_time,
+                                          end_time: end_time,
+                                          day_of_week: day_of_week)));
                             } else if (value == 1) {
                               // print("Class Schedule delete.");
-                              deleteSchedule(schedule_id);
+                              ApiServices.deleteSchedule(
+                                  context: context, schedule_id: schedule_id);
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ListOfSchedules()));
                             }
                           }),
                     ])),

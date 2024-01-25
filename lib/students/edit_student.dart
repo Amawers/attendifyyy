@@ -1,7 +1,8 @@
-// ignore_for_file: must_be_immutable, non_constant_identifier_names, use_key_in_widget_constructors, avoid_print
+// ignore_for_file: must_be_immutable, non_constant_identifier_names, use_key_in_widget_constructors, avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/students/list_of_student.dart';
 import 'package:attendifyyy/utils/common_widgets/text_field.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,19 @@ import 'package:email_validator/email_validator.dart';
 
 class EditStudent extends StatefulWidget {
   String? student_id;
+  String? section_id;
+  String? subject_code;
+  String? subject_id;
+  String? subject_name;
+  String? subject_teachers_id;
 
-  EditStudent({required this.student_id});
+  EditStudent(
+      {required this.student_id,
+      required this.section_id,
+      required this.subject_code,
+      required this.subject_id,
+      required this.subject_name,
+      required this.subject_teachers_id});
 
   @override
   State<EditStudent> createState() => _EditStudentState();
@@ -34,43 +46,22 @@ class _EditStudentState extends State<EditStudent> {
   @override
   void initState() {
     super.initState();
-    getStudentData();
+    fetchData();
   }
 
-  Future<void> getStudentData() async {
-    final response = await http.get(
-        Uri.parse('${Api.getStudentData}?student_id=${widget.student_id}'));
+  Future<void> fetchData() async {
+    await ApiServices.getStudentData(
+        context: context, studentId: widget.student_id);
 
-    studentData = jsonDecode(response.body);
-
-    print("Student's data: $studentData");
-
-    firstNameController.text = studentData[0]['first_name'];
-    middleInitialController.text = studentData[0]['middle_initial'];
-    lastNameController.text = studentData[0]['last_name'];
-    emailController.text = studentData[0]['email'];
-    referenceNumberController.text = studentData[0]['reference_number'];
-    courseController.text = studentData[0]['course'];
-    gradeLevelValue = studentData[0]['grade_level'];
-  }
-
-  Future<void> editStudent() async {
-    final response = await http.put(Uri.parse(Api.updateStudentData), body: {
-      'student_id': widget.student_id,
-      'reference_number': referenceNumberController.text,
-      'first_name': firstNameController.text,
-      'middle_initial': middleInitialController.text,
-      'last_name': lastNameController.text,
-      'email': emailController.text,
-      'course': courseController.text,
-      'grade_level': gradeLevelValue,
+    setState(() {
+      firstNameController.text = ApiServices.studentFname;
+      middleInitialController.text = ApiServices.studentMinitial;
+      lastNameController.text = ApiServices.studentLname;
+      emailController.text = ApiServices.studentEmail;
+      referenceNumberController.text = ApiServices.studentReferenceNumber;
+      courseController.text = ApiServices.studentCourse;
+      gradeLevelValue = ApiServices.studentGradeLevel;
     });
-
-    if (response.statusCode == 200) {
-      print(response.body);
-    } else {
-      print("nag error connect sa backend");
-    }
   }
 
   @override
@@ -191,15 +182,32 @@ class _EditStudentState extends State<EditStudent> {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     //validate textfields
                     if (_studentFormKey.currentState!.validate()) {
-                      //create student in the database
-                      editStudent();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
+                      await ApiServices.editStudent(
+                          context: context,
+                          studentId: widget.student_id,
+                          referenceNumber: referenceNumberController.text,
+                          fName: firstNameController.text,
+                          mName: middleInitialController.text,
+                          lName: lastNameController.text,
+                          email: emailController.text,
+                          course: courseController.text,
+                          gradeLevel: gradeLevelValue);
+                      await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfStudentsScreen(
+                                    section_id: widget.section_id,
+                                    subject_code: widget.subject_code,
+                                    subject_id: widget.subject_id,
+                                    subject_name: widget.subject_name,
+                                    subject_teachers_id:
+                                        widget.subject_teachers_id,
+                                  )));
                     }
-                    setState(() {});
+                    // setState(() {});
                   },
                   style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(

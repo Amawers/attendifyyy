@@ -1,7 +1,10 @@
-import 'dart:convert';
+// ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, unused_field, prefer_typing_uninitialized_variables, no_leading_underscores_for_local_identifiers
 
+import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
+import 'package:attendifyyy/scanning_qr/scan_qr_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -12,96 +15,25 @@ class ScanQrScreen extends StatefulWidget {
 }
 
 class _ScanQrScreenState extends State<ScanQrScreen> {
-  String? id;
-  String firstName = '';
-  String middleInitial = '';
-  String lastName = '';
 
   List<dynamic> studentAttendanceData = [];
-  List<dynamic> converted = [];
+  // List<dynamic> converted = [];
 
   // Initialization for subject selection
   // Remove lang ni pag implement nimos backend then puliha tung naa sa dropdown to the retrieved schedules.
   String? selectedSubject;
   String? selectedSectionName;
-  List<String> subjects = [];
 
   @override
   void initState() {
     super.initState();
-    getListOfSubjects();
+    ApiServices.getListOfSubjectSpecial();
 
     // To immediately be greeted with the pop up dialog when opening the QR Scanner
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-         await getListOfSubjects();
+      await ApiServices.getListOfSubjectSpecial();
       _showSubjectSelectionDialog(context);
     });
-  }
-
-  Future<void> getListOfSubjects() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
-
-    String? teacherId = teacherInfo?['teacher_id'];
-    if (teacherId != null && teacherId.isNotEmpty) {
-      final response = await http
-          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          converted = jsonDecode(response.body);
-          print('VALUE OF CONVERTED: $converted');
-          setState(() {
-            subjects = List<String>.from(converted
-                .map((dynamic subject) => subject['subject_name'].toString()));
-          });
-          print("sulod sa subjects: $subjects");
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No subjects")));
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
-      }
-    } else {
-      print("Error: Teacher ID is null or empty");
-    }
-  }
-
-  Future<void> processResult(String? result) async {
-    if (result != null) {
-      List<String> attributes = result.split('\t');
-
-      if (attributes.length == 5) {
-        id = attributes[0];
-        firstName = attributes[1];
-        middleInitial = attributes[2]?.isNotEmpty == true ? attributes[2] : '';
-        lastName = attributes[3];
-        String course = attributes[4];
-        // Values are printed inside the debug console to check if it has successfully retrieved information from a QR Code after scanning.
-        print('Barcode Found!');
-        print(
-            'ID: $id\nFirst Name: $firstName\nMiddle Initial: ${middleInitial ?? ''}\nLast Name: $lastName\nCourse: $course');
-
-        print(
-            "BEFORE E PROCESS SELECTED SUBJECT: ${selectedSubject} & REFERENCE ID: ${id}");
-        try {
-          final response = await http.post(Uri.parse(Api.createAttendance),
-              body: {'subject_name': selectedSubject, 'reference_number': id});
-          if (response.statusCode == 200) {
-            print(jsonDecode(response.body));
-          }
-        } catch (error) {
-          print("Wala na process ang attendance");
-        }
-
-        setState(() {
-          // To update the displayed scanned name
-        });
-      } else {
-        print('Not valid.');
-      }
-    }
   }
 
   // Method to concatenate the scanned name to Full Name
@@ -147,8 +79,12 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
                 onDetect: (capture) {
                   final List<Barcode> barcodes = capture.barcodes;
                   for (final barcode in barcodes) {
-                    processResult(barcode.rawValue);
+                    ApiServices.processResult(context: context, selectedSubject: selectedSubject, result: barcode.rawValue);
+                    
                   }
+                  setState(() {
+                    
+                  });
                 },
               ),
             ),
@@ -211,13 +147,13 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (firstName.isNotEmpty || lastName.isNotEmpty)
+                  if (ApiServices.ScanfirstName.isNotEmpty || ApiServices.ScanlastName.isNotEmpty)
                     Column(
                       children: [
                         // The displayed scanned name
                         Text(
                           concatenateScannedName(
-                              firstName, middleInitial, lastName),
+                              ApiServices.ScanfirstName, ApiServices.middleInitial, ApiServices.ScanlastName),
                           style: const TextStyle(
                             color: Color(0xff081631),
                             fontWeight: FontWeight.bold,
@@ -294,7 +230,6 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
   // The "Select Subject" pop up dialog with the Dropdown menu
   void _showSubjectSelectionDialog(BuildContext context) async {
-
     final selected = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -327,7 +262,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
               });
               Navigator.pop(context, newValue);
             },
-            items: subjects.map((String value) {
+            items: ApiServices.subjectsSpecial.map((String value) {
               return DropdownMenuItem(
                 value: value,
                 child: Text(value),
@@ -345,149 +280,4 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       });
     }
   }
-}
-
-class ScanQrOverlay extends StatelessWidget {
-  const ScanQrOverlay({Key? key, required this.overlayColour})
-      : super(key: key);
-
-  final Color overlayColour;
-
-  @override
-  Widget build(BuildContext context) {
-    double scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
-        ? 300.0
-        : 430.0;
-    return Stack(children: [
-      ColorFiltered(
-        colorFilter: ColorFilter.mode(
-            overlayColour, BlendMode.srcOut), // This one will create the magic
-        child: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                  color: Colors.red,
-                  backgroundBlendMode: BlendMode
-                      .dstOut), // This one will handle background + difference out
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                height: scanArea,
-                width: scanArea,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      Align(
-        alignment: Alignment.center,
-        child: CustomPaint(
-          foregroundPainter: BorderPainter(),
-          child: SizedBox(
-            width: scanArea + 20,
-            height: scanArea + 20,
-          ),
-        ),
-      ),
-    ]);
-  }
-}
-
-// Creates the white borders
-class BorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const width = 4.0;
-    const radius = 20.0;
-    const tRadius = 3 * radius;
-    final rect = Rect.fromLTWH(
-      width,
-      width,
-      size.width - 2 * width,
-      size.height - 2 * width,
-    );
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(radius));
-    const clippingRect0 = Rect.fromLTWH(
-      0,
-      0,
-      tRadius,
-      tRadius,
-    );
-    final clippingRect1 = Rect.fromLTWH(
-      size.width - tRadius,
-      0,
-      tRadius,
-      tRadius,
-    );
-    final clippingRect2 = Rect.fromLTWH(
-      0,
-      size.height - tRadius,
-      tRadius,
-      tRadius,
-    );
-    final clippingRect3 = Rect.fromLTWH(
-      size.width - tRadius,
-      size.height - tRadius,
-      tRadius,
-      tRadius,
-    );
-
-    final path = Path()
-      ..addRect(clippingRect0)
-      ..addRect(clippingRect1)
-      ..addRect(clippingRect2)
-      ..addRect(clippingRect3);
-
-    canvas.clipPath(path);
-    canvas.drawRRect(
-      rrect,
-      Paint()
-        ..color = Color(0xFF081631)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width,
-    );
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class BarReaderSize {
-  static double width = 200;
-  static double height = 200;
-}
-
-class OverlayWithHolePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black54;
-    canvas.drawPath(
-        Path.combine(
-          PathOperation.difference,
-          Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
-          Path()
-            ..addOval(Rect.fromCircle(
-                center: Offset(size.width - 44, size.height - 44), radius: 40))
-            ..close(),
-        ),
-        paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-@override
-bool shouldRepaint(CustomPainter oldDelegate) {
-  return false;
 }

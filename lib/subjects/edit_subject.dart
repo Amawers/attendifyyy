@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable, non_constant_identifier_names, library_private_types_in_public_api, use_key_in_widget_constructors, avoid_print
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/subjects/list_of_subject.dart';
 import 'package:attendifyyy/utils/common_widgets/text_field.dart';
 
@@ -42,30 +43,26 @@ class _EditSubject extends State<EditSubject> {
   }
 
   Future<void> getSubjectData() async {
-    // // final response = await http.get(
-    // //     Uri.parse('${Api.getSubjectData}?subject_id=${widget.subject_id}'));
-    // // subjectData = jsonDecode(response.body);
-    // print("SUBJECT DATA NIYA: $subjectData");
     subjectNameController.text = widget.subject_name!;
     subjectCodeController.text = widget.subject_code!;
     sectionNameController.text = widget.section_name!;
   }
 
-  Future<void> editSubject() async {
-    final response = await http.put(Uri.parse(Api.updateSubjectData), body: {
-      'subject_teachers_id': widget.subject_teachers_id,
-      'subject_name': subjectNameController.text,
-      'subject_code': subjectCodeController.text,
-      'section_name': sectionNameController.text,
-      'semester': semesterValue
-    });
+  // Future<void> editSubject() async {
+  //   final response = await http.put(Uri.parse(Api.updateSubjectData), body: {
+  //     'subject_teachers_id': widget.subject_teachers_id,
+  //     'subject_name': subjectNameController.text,
+  //     'subject_code': subjectCodeController.text,
+  //     'section_name': sectionNameController.text,
+  //     'semester': semesterValue
+  //   });
 
-    if (response.statusCode == 200) {
-      print(response.body);
-    } else {
-      print("nag error connect sa backend");
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     print(response.body);
+  //   } else {
+  //     print("nag error connect sa backend");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -142,18 +139,20 @@ class _EditSubject extends State<EditSubject> {
                 ),
                 const SizedBox(height: 20.0),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     //validate textfields
                     if (_subjectFormKey.currentState!.validate()) {
-                      //create subject in the database
-                      // EditSubject(
-                      //     subject_id: widget.subject_id,
-                      //     section_name: widget.section_name,
-                      //     subject_code: widget.subject_code,
-                      //     subject_name: widget.subject_name);
-                      editSubject();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
+                      await ApiServices.editSubject(
+                          context: context,
+                          subTeacherId: widget.subject_teachers_id,
+                          subject: subjectNameController.text,
+                          subjectCode: subjectCodeController.text,
+                          section: sectionNameController.text,
+                          semester: semesterValue);
+                      await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfSubjects()));
                     }
                   },
                   style: ButtonStyle(

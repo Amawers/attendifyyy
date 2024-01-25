@@ -2,11 +2,13 @@
 
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/students/create_student.dart';
 import 'package:attendifyyy/students/delete_student.dart';
 import 'package:attendifyyy/students/edit_student.dart';
 import 'package:attendifyyy/students/widgets/list_of_student_widget.dart';
+import 'package:attendifyyy/subjects/list_of_subject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,43 +39,22 @@ class ListOfStudentsScreen extends StatefulWidget {
 }
 
 class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
-  List<dynamic> studentList = [];
-
   bool editStudentIcon = false; //variable paras edit subject
 
   @override
   void initState() {
     super.initState();
-    getListOfStudents();
+    fetchData();
   }
 
-  Future<void> getListOfStudents() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
+  Future<void> fetchData() async {
+    await ApiServices.getListOfStudents(
+        context: context,
+        subject: widget.subject_name,
+        sectionId: widget.section_id,
+        subjectId: widget.subject_id);
 
-    String teacherId = teacherInfo?['teacher_id'];
-
-    Map<String, String> headers = {
-      'subject_name': widget.subject_name ?? '',
-      'section_id': widget.section_id ?? '',
-      'subject_id': widget.subject_id ?? '',
-      'teacher_id': teacherId
-    };
-    try {
-      final response =
-          await http.get(Uri.parse(Api.listOfStudents), headers: headers);
-
-      if (response.statusCode == 200) {
-        setState(() {
-          studentList = jsonDecode(response.body);
-        });
-        print("Sa student list ni ${studentList}");
-      } else {
-        print("nag error conenct sa backend");
-      }
-    } catch (error) {
-      print("kani nag eror $error");
-    }
+    setState(() {});
   }
 
   @override
@@ -82,9 +63,12 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xff081631)),
-          onPressed: () => Navigator.pop(context),
-        ),
+            icon: const Icon(Icons.arrow_back, color: Color(0xff081631)),
+            onPressed: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => ListOfSubjects()));
+              ApiServices.studentListData.clear();
+            }),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -165,17 +149,19 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
             ),
           ),
           Expanded(
-            child: (studentList.isEmpty)
+            child: (ApiServices.studentListData.isEmpty)
                 ? const Center(child: Text('Empty'))
                 : ListView.builder(
                     padding: const EdgeInsets.all(14.0),
-                    itemCount: studentList.length,
+                    itemCount: ApiServices.studentListData.length,
                     itemBuilder: (context, index) {
                       return ListOfStudentsWidget(
-                        first_name:
-                            studentList[index]['first_name'] ?? 'No fname',
-                        last_name:
-                            studentList[index]['last_name'] ?? 'No lname',
+                        first_name: ApiServices.studentListData[index]
+                                ['first_name'] ??
+                            'No fname',
+                        last_name: ApiServices.studentListData[index]
+                                ['last_name'] ??
+                            'No lname',
                         editBackground: editStudentIcon
                             ? Colors.transparent
                             : Colors.white, //add argument para sa bg color
@@ -192,9 +178,18 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                                           builder: (BuildContext context) =>
                                               Dialog(
                                             child: DeleteStudent(
-                                                student_id: studentList[index]
-                                                        ['student_id'] ??
-                                                    'No fname'),
+                                                student_id: ApiServices
+                                                            .studentListData[
+                                                        index]['student_id'] ??
+                                                    'No fname',
+                                                section_id: widget.section_id,
+                                                subject_id: widget.subject_id,
+                                                subject_code:
+                                                    widget.subject_code,
+                                                subject_name:
+                                                    widget.subject_name,
+                                                subject_teachers_id:
+                                                    widget.subject_teachers_id),
                                           ),
                                         );
                                       },
@@ -213,9 +208,18 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                                           builder: (BuildContext context) =>
                                               Dialog(
                                             child: EditStudent(
-                                                student_id: studentList[index]
-                                                        ['student_id'] ??
-                                                    'No fname'),
+                                                student_id: ApiServices
+                                                            .studentListData[
+                                                        index]['student_id'] ??
+                                                    'No fname',
+                                                section_id: widget.section_id,
+                                                subject_id: widget.subject_id,
+                                                subject_code:
+                                                    widget.subject_code,
+                                                subject_name:
+                                                    widget.subject_name,
+                                                subject_teachers_id:
+                                                    widget.subject_teachers_id),
                                           ),
                                         );
                                       },
@@ -226,7 +230,8 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
                                 ],
                               )
                             : Text(
-                                studentList[index]['grade_level'] ??
+                                ApiServices.studentListData[index]
+                                        ['grade_level'] ??
                                     'No grade level',
                                 style: const TextStyle(
                                     color: Colors.black,
@@ -246,7 +251,12 @@ class _ListOfStudentsScreenState extends State<ListOfStudentsScreen> {
             context: context,
             builder: (BuildContext context) => Dialog(
               child: CreateStudent(
-                  section_id: widget.section_id, subject_id: widget.subject_id),
+                section_id: widget.section_id,
+                subject_id: widget.subject_id,
+                subject_code: widget.subject_code,
+                subject_name: widget.subject_name,
+                subject_teachers_id: widget.subject_teachers_id,
+              ),
             ),
           );
         },

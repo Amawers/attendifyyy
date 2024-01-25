@@ -1,6 +1,7 @@
-// ignore_for_file: must_be_immutable, non_constant_identifier_names, use_key_in_widget_constructors, avoid_print
+// ignore_for_file: must_be_immutable, non_constant_identifier_names, use_key_in_widget_constructors, avoid_print, use_build_context_synchronously
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/students/list_of_student.dart';
 import 'package:attendifyyy/utils/common_widgets/text_field.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +10,17 @@ import 'package:email_validator/email_validator.dart';
 
 class CreateStudent extends StatefulWidget {
   String? section_id;
+  String? subject_code;
   String? subject_id;
+  String? subject_name;
+  String? subject_teachers_id;
 
-  CreateStudent({required this.section_id, required this.subject_id});
-
+  CreateStudent(
+      {required this.section_id,
+      required this.subject_code,
+      required this.subject_id,
+      required this.subject_name,
+      required this.subject_teachers_id});
   @override
   State<CreateStudent> createState() => _CreateStudentState();
 }
@@ -29,30 +37,30 @@ class _CreateStudentState extends State<CreateStudent> {
 
   final _studentFormKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
-  Future<void> createStudent() async {
-    final response = await http.post(Uri.parse(Api.createStudent), body: {
-      'reference_number': referenceNumberController.text,
-      'first_name': firstNameController.text,
-      'middle_initial': middleInitialController.text,
-      'last_name': lastNameController.text,
-      'email': emailController.text,
-      'course': courseController.text,
-      'grade_level': gradeLevelValue,
-      'section_id': widget.section_id,
-      'subject_id': widget.subject_id
-    });
+  // Future<void> createStudent() async {
+  //   final response = await http.post(Uri.parse(Api.createStudent), body: {
+  //     'reference_number': referenceNumberController.text,
+  //     'first_name': firstNameController.text,
+  //     'middle_initial': middleInitialController.text,
+  //     'last_name': lastNameController.text,
+  //     'email': emailController.text,
+  //     'course': courseController.text,
+  //     'grade_level': gradeLevelValue,
+  //     'section_id': widget.section_id,
+  //     'subject_id': widget.subject_id
+  //   });
 
-    if (response.statusCode == 200) {
-      print(response.body);
-    } else {
-      print("nag error connect sa backend");
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     print(response.body);
+  //   } else {
+  //     print("nag error connect sa backend");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -174,15 +182,33 @@ class _CreateStudentState extends State<CreateStudent> {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     //validate textfields
                     if (_studentFormKey.currentState!.validate()) {
-                      //create student in the database
-                      createStudent();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
+                      
+                      await ApiServices.createStudent(
+                          context: context,
+                          referenceNumber: referenceNumberController.text,
+                          fName: firstNameController.text,
+                          mName: middleInitialController.text,
+                          lName: lastNameController.text,
+                          email: emailController.text,
+                          course: courseController.text,
+                          gradeLevel: gradeLevelValue,
+                          sectionId: widget.section_id,
+                          subjectId: widget.subject_id);
+                      await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfStudentsScreen(
+                                    section_id: widget.section_id,
+                                    subject_code: widget.subject_code,
+                                    subject_id: widget.subject_id,
+                                    subject_name: widget.subject_name,
+                                    subject_teachers_id:
+                                        widget.subject_teachers_id,
+                                  )));
                     }
-                    setState(() {});
                   },
                   style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(

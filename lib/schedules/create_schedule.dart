@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/bottom_nav_bar.dart';
 import 'package:attendifyyy/schedules/widgets/create_schedule_card.dart';
@@ -13,45 +14,17 @@ class ListOfSchedules extends StatefulWidget {
   @override
   State<ListOfSchedules> createState() => _ListOfSchedulesState();
 }
-
 class _ListOfSchedulesState extends State<ListOfSchedules> {
-  List<dynamic> converted = [];
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () async {
-      await getListOfSchedules();
-    });
+    fetchData();
   }
 
-  Future<void> getListOfSchedules() async {
-    String? teacherId;
-    try {
-      Map<String, dynamic>? teacherInfo =
-          await RememberUserPreferences.readUserInfo();
-
-      teacherId = teacherInfo?['teacher_id'];
-    } catch (error) {
-      print("Error lods: $error");
-    }
-
-    final response = await http
-        .get(Uri.parse('${Api.listOfSchedules}?teacher_id=$teacherId'));
-    if (response.statusCode == 200) {
-      if (response.body.isNotEmpty) {
-        setState(() {
-          converted = jsonDecode(response.body);
-        });
-        print("Already converted from Json: $converted");
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("No schedules")));
-      }
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed to fetch schedules")));
-    }
+  Future<void> fetchData() async {
+    await ApiServices.getListOfSchedules(context: context);
+    setState(() {});
   }
 
   @override
@@ -73,16 +46,16 @@ class _ListOfSchedulesState extends State<ListOfSchedules> {
       ),
       body: ListView.builder(
           padding: const EdgeInsets.fromLTRB(14.0, 14.0, 14.0, 80.0),
-          itemCount: converted.length,
+          itemCount: ApiServices.scheduleListData.length,
           itemBuilder: (context, index) {
             //create card for each class schedule data in converted list
             return ClassScheduleCard(
-              schedule_id: converted[index]['schedule_id'],
-              subject_name: converted[index]['subject_name'],
-              section_name: converted[index]['section_name'],
-              start_time: converted[index]['start_time'],
-              end_time: converted[index]['end_time'],
-              day_of_week: converted[index]['day_of_week'],
+              schedule_id: ApiServices.scheduleListData[index]['schedule_id'],
+              subject_name: ApiServices.scheduleListData[index]['subject_name'],
+              section_name: ApiServices.scheduleListData[index]['section_name'],
+              start_time: ApiServices.scheduleListData[index]['start_time'],
+              end_time: ApiServices.scheduleListData[index]['end_time'],
+              day_of_week: ApiServices.scheduleListData[index]['day_of_week'],
               backgroundColor: backgroundColors[index % 2],
             );
           }),

@@ -1,6 +1,8 @@
 // ignore_for_file: must_be_immutable, non_constant_identifier_names, use_key_in_widget_constructors, avoid_print, deprecated_member_use
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
+import 'package:attendifyyy/subjects/list_of_subject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,15 +17,15 @@ class DeleteSubject extends StatefulWidget {
 }
 
 class _DeleteSubjectState extends State<DeleteSubject> {
-  Future<void> deleteSubject() async {
-    final response = await http.delete(Uri.parse(Api.deleteSubject), body: {
-      'subject_id': widget.subject_id,
-      'section_id': widget.section_id
-    });
+  // Future<void> deleteSubject() async {
+  //   final response = await http.delete(Uri.parse(Api.deleteSubject), body: {
+  //     'subject_id': widget.subject_id,
+  //     'section_id': widget.section_id
+  //   });
 
-    print(response.body);
-    setState(() {});
-  }
+  //   print(response.body);
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +52,15 @@ class _DeleteSubjectState extends State<DeleteSubject> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    deleteSubject();
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    await ApiServices.deleteSubject(
+                        context: context,
+                        subjectId: widget.subject_id,
+                        sectionId: widget.section_id);
+                    await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfSubjects()));
                   },
                   icon: const Icon(
                     Icons.check,

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 Widget createStatsCard(
     IconData materialIcon, int backgroundColor, String label, int count) {
   return Container(
-    width: 100.0,
+    width: 90.0,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(14.0),
       //background color of stats card

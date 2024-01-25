@@ -13,19 +13,19 @@ Widget createStudentCard(status, name, timeIn) {
 
   //set status icon
   switch (status) {
-    case "PRESENT":
+    case "Present":
       {
         _iconColor = 0xFF039000;
         _materialIcon = Icons.playlist_add_check_outlined;
       }
       break;
-    case "LATE":
+    case "Late":
       {
         _iconColor = 0xFFFF9900;
         _materialIcon = Icons.timer_off_rounded;
       }
       break;
-    case "ABSENT":
+    case "Absent":
     default:
       {
         _iconColor = 0xFFFF9900;

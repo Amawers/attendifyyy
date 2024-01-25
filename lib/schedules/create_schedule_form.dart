@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:attendifyyy/api_connection/api_services.dart';
+import 'package:attendifyyy/schedules/create_schedule.dart';
 import "package:flutter/material.dart";
 import 'package:attendifyyy/api_connection/api_connection.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:http/http.dart' as http;
-
 
 List<String> dayOfWeekList = [
   "Monday",
@@ -14,7 +15,6 @@ List<String> dayOfWeekList = [
   "Saturday",
   "Sunday"
 ];
-
 
 class CreateSchedule extends StatefulWidget {
   const CreateSchedule({super.key});
@@ -31,65 +31,15 @@ class _CreateScheduleState extends State<CreateSchedule> {
   TimeOfDay endTime = TimeOfDay.now();
   String? _dayWeekValue;
 
-  List<dynamic> converted = [];
-
   @override
   void initState() {
     super.initState();
-    getListOfSubjects();
+    fetchData();
   }
 
-  Future<void> getListOfSubjects() async {
-    Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
-
-    String? teacherId = teacherInfo?['teacher_id'];
-    if (teacherId != null && teacherId.isNotEmpty) {
-      final response = await http
-          .get(Uri.parse('${Api.listOfSubjects}?teacher_id=$teacherId'));
-      if (response.statusCode == 200) {
-        if (response.body.isNotEmpty) {
-          setState(() {
-            converted = jsonDecode(response.body);
-          });
-          // print("KANI SIYAAAA: ${converted[index]['subject_name']}");
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("No subjects")));
-        }
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Failed to fetch subjects")));
-      }
-    } else {
-      print("Error: Teacher ID is null or empty");
-    }
-  }
-
-  //post newly created schedule to the database
-  Future<void> createSchedule() async {
-    Map<String, dynamic>? teacherInfo =
-    await RememberUserPreferences.readUserInfo();
-
-    String teacherId = teacherInfo?['teacher_id'];
-
-    print("Sulod sa start time: ${startTime}");
-    print('subject name sa FUNCTION $_subjectNameValue');
-    print('section name sa FUNCTION $_sectionNameValue');
-
-    final response = await http.post(Uri.parse(Api.createSchedule), body: {
-      'teacher_id': teacherId,
-      'subject_name': _subjectNameValue,
-      'section_name': _sectionNameValue,
-      'start_time':
-      "$startTime.", //I wrap it with double quote to convert it into string
-      'end_time': "$endTime",
-      'days_of_week': _dayWeekValue
-    });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${response.body}')));
-
-    print(response.body);
+  Future<void> fetchData() async {
+    await ApiServices.getListOfSubjects();
+    setState(() {});
   }
 
   @override
@@ -127,7 +77,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
+                            BorderSide(width: 2, color: Color(0xFF081631))),
                     //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -136,8 +86,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
                   isExpanded: true, //set width to 100%
                   // value: dayWeekValue,
                   icon: const Icon(Icons.arrow_drop_down),
-                  items:
-                  converted.map<DropdownMenuItem<String>>((dynamic value) {
+                  items: ApiServices.subjectListData
+                      .map<DropdownMenuItem<String>>((dynamic value) {
                     String combinedValue =
                         "${value['section_name']} - ${value['subject_name']}";
                     return DropdownMenuItem(
@@ -254,7 +204,7 @@ class _CreateScheduleState extends State<CreateSchedule> {
                     focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide:
-                        BorderSide(width: 2, color: Color(0xFF081631))),
+                            BorderSide(width: 2, color: Color(0xFF081631))),
                     //border radius
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -283,12 +233,19 @@ class _CreateScheduleState extends State<CreateSchedule> {
                 * */
                 TextButton(
                     onPressed: () {
-                      print("pressed");
-                      //validate input fields
                       if (_subjectFormKey.currentState!.validate()) {
-                        print("submitted");
-                        createSchedule();
+                        ApiServices.createSchedule(
+                            context: context,
+                            subject: _subjectNameValue,
+                            section: _sectionNameValue,
+                            start: startTime,
+                            end: endTime,
+                            dayWeekValue: _dayWeekValue);
                       }
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfSchedules()));
                     },
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all<Size>(
@@ -302,8 +259,8 @@ class _CreateScheduleState extends State<CreateSchedule> {
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          )),
+                        borderRadius: BorderRadius.circular(10.0),
+                      )),
                     ),
                     child: const Text("Create",
                         style: TextStyle(

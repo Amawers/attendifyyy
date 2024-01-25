@@ -1,6 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, unused_local_variable
 
 import 'package:attendifyyy/api_connection/api_connection.dart';
+import 'package:attendifyyy/api_connection/api_services.dart';
 import 'package:attendifyyy/authentication/user_preferences/user_preferences.dart';
 import 'package:attendifyyy/subjects/list_of_subject.dart';
 import 'package:attendifyyy/utils/common_widgets/text_field.dart';
@@ -21,20 +22,20 @@ class _CreateSubject extends State<CreateSubject> {
 
   final _subjectFormKey = GlobalKey<FormState>();
 
-  Future<void> createSubject() async {
-    Map<String, dynamic>? teacherInfo =
-        await RememberUserPreferences.readUserInfo();
+  // Future<void> createSubject() async {
+  //   Map<String, dynamic>? teacherInfo =
+  //       await RememberUserPreferences.readUserInfo();
 
-    String teacherId = teacherInfo?['teacher_id'];
+  //   String teacherId = teacherInfo?['teacher_id'];
 
-    final response = await http.post(Uri.parse(Api.createSubject), body: {
-      'teacher_id': teacherId,
-      'subject_name': subjectNameController.text,
-      'subject_code': subjectCodeController.text,
-      'section_name': sectionNameController.text,
-      'semester': semesterValue
-    });
-  }
+  //   final response = await http.post(Uri.parse(Api.createSubject), body: {
+  //     'teacher_id': teacherId,
+  //     'subject_name': subjectNameController.text,
+  //     'subject_code': subjectCodeController.text,
+  //     'section_name': sectionNameController.text,
+  //     'semester': semesterValue
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -111,13 +112,20 @@ class _CreateSubject extends State<CreateSubject> {
                 ),
                 const SizedBox(height: 20.0),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     //validate textfields
                     if (_subjectFormKey.currentState!.validate()) {
                       //create subject in the database
-                      createSubject();
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(); //close dialog
+                      await ApiServices.createSubject(
+                          context: context,
+                          subject: subjectNameController.text,
+                          subjectCode: subjectCodeController.text,
+                          section: sectionNameController.text,
+                          semester: semesterValue);
+                      await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ListOfSubjects()));
                     }
                   },
                   style: ButtonStyle(
