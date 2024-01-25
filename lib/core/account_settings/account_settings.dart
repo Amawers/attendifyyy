@@ -29,23 +29,36 @@ class _AccountSettingsState extends State<AccountSettings> {
   @override
   void initState() {
     super.initState();
-    ApiServices.getTeacherData().then((_) {
-      ApiServices.retrieveImage(
-        context: context
-      ).then((_) {
-        initializeControllerValues();
-        setState(() {});
-      });
+    // ApiServices.getTeacherData().then((_) {
+    //   ApiServices.retrieveImage(context: context).then((_) {
+    //     initializeControllerValues();
+    //     setState(() {});
+    //   });
+    // });
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    await ApiServices.getTeacherData();
+    setState(() {});
+
+    await ApiServices.retrieveImage(context: context);
+    setState(() {
+      fnameController.text = ApiServices.firstName ?? "";
+      lnameController.text = ApiServices.lastName ?? "";
+      emailController.text = ApiServices.email ?? "";
+      contactNoController.text = ApiServices.contactNumber ?? "";
+      departmentController.text = ApiServices.department ?? "";
     });
   }
 
-  void initializeControllerValues() {
-    fnameController.text = ApiServices.firstName ?? "";
-    lnameController.text = ApiServices.lastName ?? "";
-    emailController.text = ApiServices.email ?? "";
-    contactNoController.text = ApiServices.contactNumber ?? "";
-    departmentController.text = ApiServices.department ?? "";
-  }
+  // void initializeControllerValues() {
+  //   fnameController.text = ApiServices.firstName ?? "";
+  //   lnameController.text = ApiServices.lastName ?? "";
+  //   emailController.text = ApiServices.email ?? "";
+  //   contactNoController.text = ApiServices.contactNumber ?? "";
+  //   departmentController.text = ApiServices.department ?? "";
+  // }
 
   // Future<void> retrieveImage() async {
   //   String? teacherId;

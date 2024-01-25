@@ -31,6 +31,7 @@ class ApiServices {
   static String ScanfirstName = '';
   static String middleInitial = '';
   static String ScanlastName = '';
+  static List<dynamic> recentAttendanceList = [];
 
   static Future<void> updateAccount(
       {required BuildContext context,
@@ -870,6 +871,35 @@ class ApiServices {
               style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 1)));
+    }
+  }
+
+  static Future<void> getRecentAttendance() async {
+    Map<String, dynamic>? teacherInfo =
+        await RememberUserPreferences.readUserInfo();
+
+    String teacherId = teacherInfo?['teacher_id'];
+
+    try {
+      final response = await http
+          .get(Uri.parse('${Api.getRecentAttendance}?teacher_id=$teacherId'));
+
+      if (response.statusCode == 200) {
+        print("RETRIEVE TEACHER DATA: Connection to API established.");
+
+        var decoded = jsonDecode(response.body);
+
+        if (decoded['success'] == true) {
+          print("RETRIEVE TEACHER DATA: Data retrieval success.");
+          recentAttendanceList = decoded['recent_attendance_list'];
+        } else if (decoded['success'] == false) {
+          print("RETRIEVE TEACHER DATA: Data retrieval failed.");
+        }
+      } else {
+        print("RETRIEVE SUBJECTS LIST: Problem communicating with API.");
+      }
+    } catch (error) {
+      print("DEVSIDE TO HANDLE");
     }
   }
 }
